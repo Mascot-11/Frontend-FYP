@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { register } from "../Utils/api";
+import { ToastContainer, toast } from "react-toastify"; // Import Toastify
+import "react-toastify/dist/ReactToastify.css"; // Import the CSS for styling
 
 const Register = () => {
   const [name, setName] = useState("");

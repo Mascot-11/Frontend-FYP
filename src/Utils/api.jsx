@@ -30,47 +30,63 @@ const getCSRFToken = async () => {
 // Set up default axios config to include cookies in each request
 axios.defaults.withCredentials = true; // This ensures cookies are included in each request
 
-// Login function// Login function
 // Login function
-// login function
 export const login = async (credentials) => {
   try {
-    // Log the credentials to make sure it's what you expect
     console.log("Logging in with credentials:", credentials);
 
     await getCSRFToken(); // Ensure CSRF token is set before making login request
 
     const response = await axios.post(`${BASE_URL}/api/login`, credentials);
 
-    const { access_token } = response.data;
+    const { access_token, user } = response.data;
     if (access_token) {
       localStorage.setItem(AUTH_TOKEN_KEY, access_token);
-      localStorage.setItem("user_role", user.role); // Store user role
+      localStorage.setItem("user_role", user?.role); // Ensure user role is available before storing
     }
+
     return response.data;
   } catch (error) {
+    console.error("Login error:", error.response?.data || error.message);
     throw error.response?.data || error.message;
   }
 };
 
+// Register function
 export const register = async (userData) => {
   try {
-    await getCSRFToken(); // Ensure CSRF token is set before making register request
+    // Set the default role to 'user' if not provided
+    const userWithRole = { ...userData, role: userData.role || "user" };
 
-    const response = await axios.post(`${BASE_URL}/api/register`, userData);
+    // Fetch the CSRF token to ensure it's sent with the request
+    await getCSRFToken();
 
-    // Store the token in localStorage (you can also use sessionStorage)
-    const { access_token } = response.data;
+    // Make the POST request to register the user
+    const response = await axios.post(
+      `${BASE_URL}/api/register`,
+      userWithRole,
+      {
+        withCredentials: true, // Ensure credentials are sent along with the request
+      }
+    );
 
+    // If registration is successful, store the access token
+    const { access_token, user } = response.data;
     if (access_token) {
-      localStorage.setItem(AUTH_TOKEN_KEY, access_token);
+      localStorage.setItem(AUTH_TOKEN_KEY, access_token); // Store token in localStorage
+      localStorage.setItem("user_role", user?.role || "user"); // Store user role for further use
     }
+
+    // Return the response data after successful registration
     return response.data;
   } catch (error) {
+    // Handle errors, log to the console, and throw an error for handling in the UI
+    console.error("Registration error:", error.response?.data || error.message);
     throw error.response?.data || error.message;
   }
 };
 
+// Logout function
 export const logout = async (setIsUserLoggedIn) => {
   try {
     await getCSRFToken();
@@ -89,6 +105,10 @@ export const forgotPassword = async (email) => {
     const response = await api.post("/forgot/password", { email });
     return response.data;
   } catch (error) {
+    console.error(
+      "Password reset error:",
+      error.response?.data || error.message
+    );
     throw error.response?.data || { message: "Unable to send reset link." };
   }
 };
@@ -98,6 +118,10 @@ export const resetPassword = async (data) => {
     const response = await api.post("/password/reset", data);
     return response.data;
   } catch (error) {
+    console.error(
+      "Password reset error:",
+      error.response?.data || error.message
+    );
     throw error.response?.data || { message: "Failed to reset password." };
   }
 };
@@ -113,16 +137,12 @@ export const isLoggedIn = () => {
   const token = getauth_token();
   return token ? true : false; // Return true if token exists, otherwise false
 };
+
 export const isAuthenticated = () => {
   return localStorage.getItem("auth_token") !== null;
 };
 
-/**
- * Fetch all users from the backend API
- *
- * @returns {Promise<Array<object>>} An array of user objects
- * @throws {Error} If there is an error fetching users
- */
+// Fetch all users from the backend API
 export const getUsers = async () => {
   try {
     const token = localStorage.getItem("auth_token");
@@ -131,7 +151,6 @@ export const getUsers = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-    // Return the users array from the API response
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -139,7 +158,7 @@ export const getUsers = async () => {
   }
 };
 
-// add a user
+// Add a user
 export const addUser = async (userData) => {
   try {
     const token = localStorage.getItem("auth_token");
@@ -150,14 +169,12 @@ export const addUser = async (userData) => {
     });
     return response.data;
   } catch (error) {
-    console.error(
-      "Error adding user:",
-      error.response ? error.response.data : error.message
-    );
+    console.error("Error adding user:", error.response?.data || error.message);
     throw error.response?.data || error.message;
   }
 };
 
+// Update a user
 export const updateUser = async (userId, userData) => {
   try {
     const token = localStorage.getItem("auth_token");
@@ -174,12 +191,13 @@ export const updateUser = async (userId, userData) => {
   } catch (error) {
     console.error(
       "Error updating user:",
-      error.response ? error.response.data : error.message
+      error.response?.data || error.message
     );
     throw error.response?.data || error.message;
   }
 };
 
+// Delete a user
 export const deleteUser = async (userId) => {
   try {
     const token = localStorage.getItem("auth_token");
@@ -192,7 +210,7 @@ export const deleteUser = async (userId) => {
   } catch (error) {
     console.error(
       "Error deleting user:",
-      error.response ? error.response.data : error.message
+      error.response?.data || error.message
     );
     throw error.response?.data || error.message;
   }
@@ -206,6 +224,10 @@ export const bookAppointment = async (appointmentData) => {
     });
     return response.data;
   } catch (error) {
+    console.error(
+      "Error booking appointment:",
+      error.response?.data || error.message
+    );
     throw error.response?.data?.message || error.message;
   }
 };
@@ -217,6 +239,10 @@ export const fetchAppointments = async () => {
     });
     return response.data;
   } catch (error) {
+    console.error(
+      "Error fetching appointments:",
+      error.response?.data || error.message
+    );
     throw error.response?.data?.message || error.message;
   }
 };
@@ -232,6 +258,10 @@ export const updateAppointmentStatus = async (id, status) => {
     );
     return response.data;
   } catch (error) {
+    console.error(
+      "Error updating appointment status:",
+      error.response?.data || error.message
+    );
     throw error.response?.data?.message || error.message;
   }
 };
@@ -243,6 +273,10 @@ export const deleteAppointment = async (id) => {
     });
     return response.data;
   } catch (error) {
+    console.error(
+      "Error deleting appointment:",
+      error.response?.data || error.message
+    );
     throw error.response?.data?.message || error.message;
   }
 };

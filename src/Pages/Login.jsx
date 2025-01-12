@@ -1,28 +1,27 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
-import { login } from "../Utils/api"; // Ensure the login function is correctly implemented
+import { useNavigate } from "react-router-dom";
+import { login } from "../Utils/api";
 import { Link } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify"; // Import Toastify
-import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // Initialize the navigate function
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // Attempt login using the credentials
       const data = await login({ email, password });
 
-      // Store the authentication token in localStorage (or sessionStorage)
-      localStorage.setItem("authToken", data.access_token); // Use the correct token property from your API response
+      // Store the token
+      localStorage.setItem("authToken", data.access_token);
 
-      // Display a success message
+      // Show a success message
       toast.success(`Welcome, ${data.user.name}!`);
 
-      // Redirect to the dashboard based on the user role
+      // Redirect based on role
       if (data.user.role === "admin") {
         navigate("/userlist");
       } else if (data.user.role === "tattoo_artist") {
@@ -31,8 +30,13 @@ const Login = () => {
         navigate("/landing");
       }
     } catch (error) {
-      // Display the error message
-      toast.error(`Error: ${error.message}`);
+      if (error.response && error.response.data) {
+        toast.error(`Error: ${error.response.data.message}`);
+      } else if (error.message) {
+        toast.error(`Error: ${error.message}`);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     }
   };
 
@@ -41,10 +45,15 @@ const Login = () => {
       <div className="bg-white border border-gray-200 rounded-2xl shadow-xl max-w-md w-full">
         <div className="p-8">
           <h3 className="text-3xl font-bold text-black mb-2">Login</h3>
-          <p className="text-gray-600 mb-6">Enter your credentials to access your account</p>
+          <p className="text-gray-600 mb-6">
+            Enter your credentials to access your account
+          </p>
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email Address
               </label>
               <input
@@ -59,7 +68,10 @@ const Login = () => {
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Password
               </label>
               <input
@@ -80,7 +92,10 @@ const Login = () => {
                 type="checkbox"
                 className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
               />
-              <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900">
+              <label
+                htmlFor="rememberMe"
+                className="ml-2 block text-sm text-gray-900"
+              >
                 Remember Me
               </label>
             </div>
@@ -94,14 +109,20 @@ const Login = () => {
             </div>
           </form>
           <div className="mt-6 text-center">
-            <Link to="/forgotpassword" className="text-sm text-gray-600 hover:text-black">
+            <Link
+              to="/forgotpassword"
+              className="text-sm text-gray-600 hover:text-black"
+            >
               Forgot password?
             </Link>
           </div>
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
-              Dont have an account?{" "}
-              <Link to="/register" className="font-medium text-black hover:underline">
+              Don't have an account?{" "}
+              <Link
+                to="/register"
+                className="font-medium text-black hover:underline"
+              >
                 Register
               </Link>
             </p>
