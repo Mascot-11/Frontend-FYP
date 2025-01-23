@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { resetPassword } from "../Utils/api"; // Import the resetPassword API function
-import { useSearchParams } from "react-router-dom"; // To get the token from the URL
+import { useSearchParams, Link, useNavigate } from "react-router-dom"; // For routing and navigation
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -8,6 +8,7 @@ const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   // Extract token from URL
   const token = searchParams.get("token");
@@ -26,38 +27,91 @@ const ResetPassword = () => {
       password_confirmation: passwordConfirmation,
       token,
     };
+
     const result = await resetPassword(data); // Call the API
-    setMessage(result.message); // Set message from response
+    setMessage(result.message);
+
+    // Redirect to login after a short delay if successful
+    if (result.success) {
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000); // Redirect after 2 seconds
+    }
   };
 
   return (
-    <div>
-      <h2>Reset Password</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="New password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm password"
-          value={passwordConfirmation}
-          onChange={(e) => setPasswordConfirmation(e.target.value)}
-          required
-        />
-        <button type="submit">Reset Password</button>
-      </form>
-      {message && <p>{message}</p>}
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-gray-800 text-center">
+          Reset Password
+        </h2>
+        <p className="text-gray-600 text-center mt-2 mb-6">
+          Enter your email and new password to reset your account
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              type="email"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Enter your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              New Password
+            </label>
+            <input
+              type="password"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Enter new password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Confirm new password"
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-black text-white rounded-md font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+          >
+            Reset Password
+          </button>
+        </form>
+        {message && (
+          <p
+            className={`mt-4 text-center font-medium ${
+              message === "Passwords do not match."
+                ? "text-red-500"
+                : "text-green-500"
+            }`}
+          >
+            {message}
+          </p>
+        )}
+        <div className="text-center mt-6">
+          <Link to="/login" className="text-sm text-blue-500 hover:underline">
+            Remembered your password? Login
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };

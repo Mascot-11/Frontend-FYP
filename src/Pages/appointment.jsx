@@ -10,7 +10,15 @@ import "react-toastify/dist/ReactToastify.css";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { format, setHours, setMinutes } from "date-fns";
+import Subnav from "../components/subnavbar";
 
+const navItems = [
+  { title: "Home", path: "/" },
+  { title: "Gallery", path: "/gallery" },
+  { title: "Artists", path: "/artists" },
+  { title: "Appointment", path: "/appointment" },
+  { title: "FAQs", path: "/faq" },
+];
 const TattooAppointment = () => {
   const [artistId, setArtistId] = useState("");
   const [description, setDescription] = useState("");
@@ -149,6 +157,7 @@ const TattooAppointment = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white text-gray-900">
+      <Subnav backButton={true} navItems={navItems} />
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden bg-black text-white">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black opacity-70"></div>

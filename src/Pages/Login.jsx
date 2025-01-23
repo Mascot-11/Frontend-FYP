@@ -16,18 +16,19 @@ const Login = () => {
       const data = await login({ email, password });
 
       // Store the token
-      localStorage.setItem("authToken", data.access_token);
+      localStorage.setItem("auth_token", data.access_token);
+      localStorage.setItem("user_id", data.user.id);
 
       // Show a success message
       toast.success(`Welcome, ${data.user.name}!`);
 
       // Redirect based on role
       if (data.user.role === "admin") {
-        navigate("/userlist");
+        window.location.href = "/userlist";
       } else if (data.user.role === "tattoo_artist") {
-        navigate("/landing");
+        window.location.href = "/landing";
       } else {
-        navigate("/landing");
+        window.location.href = "/landing";
       }
     } catch (error) {
       if (error.response && error.response.data) {
