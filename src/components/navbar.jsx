@@ -17,8 +17,7 @@ const NavBar = ({ isUserLoggedIn, onLogin, onLogout, user }) => {
     { to: "/landing", text: "Home", icon: Home },
     { to: "/tattoo", text: "Tattoo", icon: Palette },
     { to: "/music", text: "Music", icon: Music },
-    { to: "/userlist", text: "Users", icon: Image },
-    { to: "/appointmentslist", text: "Appointments", icon: Image },
+
     ...(isUserLoggedIn
       ? [{ to: "/login", text: "Logout", icon: LogIn, onClick: onLogout }]
       : [

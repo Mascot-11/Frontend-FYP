@@ -24,7 +24,7 @@ const ChatApp = () => {
       fetchChats();
       const interval = setInterval(() => {
         fetchChats(); // Fetch chat list every 15 seconds
-      }, 1000); // 15 seconds in milliseconds
+      }, 100000); // 15 seconds in milliseconds
 
       return () => clearInterval(interval);
     }
@@ -185,7 +185,7 @@ const ChatApp = () => {
       if (chatId) {
         fetchMessages();
       }
-    }, 8000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [chatId]);

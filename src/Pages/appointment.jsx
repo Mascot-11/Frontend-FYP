@@ -122,39 +122,6 @@ const TattooAppointment = () => {
     }
   };
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      setMessages([...messages, { text: inputMessage, sender: "user" }]);
-      setInputMessage("");
-      toast.success("Message sent successfully!");
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            text: "Thanks for your message. An artist will respond shortly!",
-            sender: "admin",
-          },
-        ]);
-      }, 1000);
-    }
-  };
-
-  const handleFileUpload = (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const image = e.target?.result;
-        setMessages([
-          ...messages,
-          { text: "Attached image:", sender: "user", image },
-        ]);
-        toast.info("Image attached successfully!");
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white text-gray-900">
       <Subnav backButton={true} navItems={navItems} />

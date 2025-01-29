@@ -7,6 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import NavBar from "./components/navbar";
+import AdminSidebar from "./components/Adminsidebar"; // Import AdminSidebar component
 import Landing from "./Pages/Landing";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
@@ -17,37 +18,53 @@ import ResetPassword from "./Pages/passwordrest";
 import AppointmentPage from "./Pages/appointment";
 import AppointmentsList from "./Pages/AdminAppointment";
 import UserList from "./Pages/userlist";
-import AdminChat from "./Pages/AdminChat";
+
 import Chat from "./Pages/Chat";
 import FAQ from "./Pages/Faq";
 import { login } from "./Utils/api";
+import TattooGallery from "./Pages/TattooGallery";
+import AdminTattooGallery from "./Pages/AdminTattooGallery";
 
 const App = () => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState(""); // Track the role of the user
 
-  // Check if the user is logged in on page load
+  // Check if the user is logged in and retrieve the role from localStorage
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
-    console.log("Token from localStorage:", token);
-    setIsUserLoggedIn(!!token);
+    const role = localStorage.getItem("user_role"); // Use the exact key as in localStorage
+    console.log("User role from localStorage:", role); // Debugging
+    if (token && role) {
+      setIsUserLoggedIn(true);
+      setUserRole(role); // Set role from localStorage
+    } else {
+      setIsUserLoggedIn(false);
+      setUserRole(""); // Reset role if no token found
+    }
   }, []);
 
   const handleLogin = async (credentials) => {
     try {
-      console.log("Login credentials:", credentials);
+      console.log("Login credentials:", credentials); // Debugging
       const data = await login(credentials);
       localStorage.setItem("auth_token", data.access_token);
+      localStorage.setItem("user_role", data.role); // Save role to localStorage (ensure the key is 'user_role')
       setIsUserLoggedIn(true);
+      setUserRole(data.role); // Update the role in state
+      console.log("Login successful, role:", data.role); // Debugging
     } catch (error) {
       console.error("Login failed:", error);
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("auth_token");
-    setIsUserLoggedIn(false);
+    localStorage.removeItem("auth_token"); // Clear auth token
+    localStorage.removeItem("user_role"); // Clear role
+    setIsUserLoggedIn(false); // Update login state
+    setUserRole(""); // Reset user role
   };
 
+  // Routes that do not require the navbar and sidebar
   const routesWithoutNavBar = [
     "/tattoo",
     "/gallery",
@@ -66,11 +83,16 @@ const App = () => {
     return (
       <>
         {showNavBar && (
-          <NavBar
-            isUserLoggedIn={isUserLoggedIn}
-            onLogin={handleLogin}
-            onLogout={handleLogout}
-          />
+          <>
+            <NavBar
+              isUserLoggedIn={isUserLoggedIn}
+              onLogin={handleLogin}
+              onLogout={handleLogout}
+              userRole={userRole} // Pass role to NavBar for conditional rendering
+            />
+            {/* Conditionally render AdminSidebar if the user is an admin */}
+            {userRole === "admin" && <AdminSidebar />}
+          </>
         )}
         <Routes>
           <Route path="/" element={<Navigate to="/landing" />} />
@@ -79,15 +101,20 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/music" element={<Music />} />
           <Route path="/tattoo" element={<Tattoo />} />
-          <Route path="/userlist" element={<UserList />} />
+          <Route path="/admin/users" element={<UserList />} />
           <Route path="/Faq" element={<FAQ />} />
-          <Route path="/appointmentslist" element={<AppointmentsList />} />
+          <Route path="/admin/appointments" element={<AppointmentsList />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/resetpassword" element={<ResetPassword />} />
           <Route path="/appointment" element={<AppointmentPage />} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="/adminchat" element={<AdminChat />} />
+          <Route path="/gallery" element={<TattooGallery />} />
+
           <Route path="*" element={<h2>Page not found</h2>} />
+          <Route
+            path="/admin/tattoo-gallery"
+            element={<AdminTattooGallery />}
+          />
         </Routes>
       </>
     );
