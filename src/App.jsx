@@ -18,6 +18,7 @@ import ResetPassword from "./Pages/passwordrest";
 import AppointmentPage from "./Pages/appointment";
 import AppointmentsList from "./Pages/AdminAppointment";
 import UserList from "./Pages/userlist";
+import MyAppointments from "./Pages/myaapointment";
 
 import Chat from "./Pages/Chat";
 import FAQ from "./Pages/Faq";
@@ -58,10 +59,7 @@ const App = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("auth_token"); // Clear auth token
-    localStorage.removeItem("user_role"); // Clear role
-    setIsUserLoggedIn(false); // Update login state
-    setUserRole(""); // Reset user role
+    localStorage.clear(); // Clear auth token
   };
 
   // Routes that do not require the navbar and sidebar
@@ -102,6 +100,7 @@ const App = () => {
           <Route path="/music" element={<Music />} />
           <Route path="/tattoo" element={<Tattoo />} />
           <Route path="/admin/users" element={<UserList />} />
+
           <Route path="/Faq" element={<FAQ />} />
           <Route path="/admin/appointments" element={<AppointmentsList />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
@@ -109,7 +108,12 @@ const App = () => {
           <Route path="/appointment" element={<AppointmentPage />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/gallery" element={<TattooGallery />} />
-
+          <Route
+            path="/myappointments"
+            element={
+              isUserLoggedIn ? <MyAppointments /> : <Navigate to="/login" />
+            }
+          />
           <Route path="*" element={<h2>Page not found</h2>} />
           <Route
             path="/admin/tattoo-gallery"

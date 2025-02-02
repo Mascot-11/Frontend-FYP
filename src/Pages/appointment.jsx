@@ -1,44 +1,47 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Calendar } from "react-date-range";
-import { ChevronDown, Paperclip, Send } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import confetti from "canvas-confetti";
+import { ChevronDown } from "lucide-react";
 import axios from "axios";
-import { bookAppointment } from "../Utils/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { format, setHours, setMinutes } from "date-fns";
 import Subnav from "../components/subnavbar";
+import { FiPaperclip } from "react-icons/fi"; // Importing attachment icon
+
+// Helper function to check if the user is logged in
+const checkLogin = () => {
+  const token = localStorage.getItem("auth_token");
+  if (!token) {
+    toast.error("You must be logged in to book an appointment.", {
+      autoClose: 6000, // Show the toast for 6 seconds
+    });
+    setTimeout(() => {
+      window.location.href = "/login"; // Redirecting to login page after 6 seconds
+    }, 6000);
+  }
+};
 
 const navItems = [
-  { title: "Home", path: "/" },
+  { title: "Home", path: "/tattoo" },
   { title: "Gallery", path: "/gallery" },
   { title: "Artists", path: "/artists" },
   { title: "Appointment", path: "/appointment" },
   { title: "FAQs", path: "/faq" },
 ];
+
 const TattooAppointment = () => {
   const [artistId, setArtistId] = useState("");
   const [description, setDescription] = useState("");
   const [artists, setArtists] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [timeRange, setTimeRange] = useState({
-    startTime: setHours(setMinutes(new Date(), 0), 9),
-    endTime: setHours(setMinutes(new Date(), 0), 10),
-  });
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      text: "Welcome to our tattoo studio! How can we help you today?",
-      sender: "admin",
-    },
-  ]);
-  const [inputMessage, setInputMessage] = useState("");
+  const [time, setTime] = useState(setHours(setMinutes(new Date(), 0), 9));
+  const [imagePreview, setImagePreview] = useState(null); // To store image preview
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    checkLogin(); // Check if the user is logged in when the component mounts
     const fetchArtists = async () => {
       try {
         const token = localStorage.getItem("auth_token");
@@ -60,10 +63,34 @@ const TattooAppointment = () => {
     setSelectedDate(date);
   };
 
-  const handleTimeRangeChange = (e, type) => {
-    const [hours, minutes] = e.target.value.split(":").map(Number);
-    const newTime = setHours(setMinutes(new Date(), minutes), hours);
-    setTimeRange((prev) => ({ ...prev, [type]: newTime }));
+  const handleTimeChange = (e) => {
+    const [hours] = e.target.value.split(":").map(Number); // Only use hours
+    const newTime = setHours(setMinutes(new Date(), 0), hours); // Set minutes to 0
+    setTime(newTime);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const maxFileSize = 5 * 1024 * 1024; // 5MB
+      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+
+      if (file.size > maxFileSize) {
+        toast.error("File size exceeds the maximum limit of 5MB.");
+        return;
+      }
+
+      if (!allowedTypes.includes(file.type)) {
+        toast.error("Invalid file type. Only JPG, PNG, and GIF are allowed.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result); // Set the image preview
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleAppointment = async (e) => {
@@ -77,6 +104,13 @@ const TattooAppointment = () => {
       return;
     }
 
+    // Ensure the appointment is within allowed hours (9 AM to 7 PM)
+    const appointmentHour = time.getHours();
+    if (appointmentHour < 9 || appointmentHour > 19) {
+      toast.error("Appointments can only be made between 9 AM and 7 PM.");
+      return;
+    }
+
     if (!artistId) {
       toast.error("Please select an artist.");
       return;
@@ -87,37 +121,54 @@ const TattooAppointment = () => {
       return;
     }
 
-    if (timeRange.endTime <= timeRange.startTime) {
-      toast.error("End time must be later than the start time.");
+    const file = fileInputRef.current.files[0];
+    if (file && !imagePreview) {
+      toast.error("Please upload a valid image.");
       return;
     }
 
     try {
       const formattedDate = format(selectedDate, "yyyy-MM-dd");
-      const formattedStartTime = format(timeRange.startTime, "HH:mm");
-      const formattedEndTime = format(timeRange.endTime, "HH:mm");
+      const formattedTime = format(time, "HH:mm");
 
-      const startDateTime = `${formattedDate} ${formattedStartTime}`;
-      const endDateTime = `${formattedDate} ${formattedEndTime}`;
+      const appointmentDateTime = `${formattedDate} ${formattedTime}`;
 
-      const response = await bookAppointment({
-        artist_id: artistId,
-        appointment_datetime: startDateTime,
-        end_datetime: endDateTime,
-        description,
-      });
+      const formData = new FormData();
+      formData.append("artist_id", artistId);
+      formData.append("appointment_datetime", appointmentDateTime);
+      formData.append("description", description);
+
+      if (file) {
+        formData.append("image", file); // Add the image file to the form data
+      }
+
+      const token = localStorage.getItem("auth_token");
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/appointments",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data", // Ensure the content type is set
+          },
+        }
+      );
 
       console.log("Appointment booked:", response);
       toast.success("Your appointment has been successfully booked!");
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ["#000000", "#FFFFFF"],
-      });
+
+      // Clear all fields after successful booking
+      setArtistId("");
+      setDescription("");
+      setSelectedDate(new Date());
+      setTime(setHours(setMinutes(new Date(), 0), 9));
+      setImagePreview(null);
+      fileInputRef.current.value = "";
     } catch (error) {
+      console.error(error); // Log error details
       toast.error(
-        error.message || "An error occurred while booking your appointment."
+        error.response?.data?.message ||
+          "An error occurred. Please try again later."
       );
     }
   };
@@ -129,38 +180,19 @@ const TattooAppointment = () => {
       <section className="relative h-screen flex items-center justify-center overflow-hidden bg-black text-white">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black opacity-70"></div>
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          <motion.h1
-            className="text-5xl md:text-7xl font-bold mb-6 tracking-tight"
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-          >
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
             Ink Your Story
-          </motion.h1>
-          <motion.p
-            className="text-xl md:text-2xl mb-10 text-gray-300"
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-          >
+          </h1>
+          <p className="text-xl md:text-2xl mb-10 text-gray-300">
             Where Art Meets Skin, Your Vision Comes to Life
-          </motion.p>
-          <motion.a
+          </p>
+          <a
             href="#booking"
             className="bg-white text-black px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-200 transition duration-300 shadow-lg inline-block"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
           >
-            Book Your Session
-          </motion.a>
+            View Tattoo Gallery
+          </a>
         </div>
-        <motion.div
-          className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          <ChevronDown className="text-white w-12 h-12" />
-        </motion.div>
       </section>
 
       {/* Booking Section */}
@@ -177,7 +209,7 @@ const TattooAppointment = () => {
               {/* Artist Selection */}
               <div>
                 <label className="block text-lg font-semibold mb-2">
-                  Select Artist
+                  Select Artist *
                 </label>
                 <select
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition duration-200"
@@ -196,7 +228,7 @@ const TattooAppointment = () => {
               {/* Date Selection */}
               <div>
                 <label className="block text-lg font-semibold mb-2">
-                  Select Date
+                  Select Date *
                 </label>
                 <Calendar
                   date={selectedDate}
@@ -208,41 +240,25 @@ const TattooAppointment = () => {
             </div>
 
             <div className="space-y-8">
-              {/* Time Range */}
+              {/* Time Selection */}
               <div>
                 <label className="block text-lg font-semibold mb-2">
-                  Select Time
+                  Select Time *
                 </label>
-                <div className="flex flex-col space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Start Time
-                    </label>
-                    <input
-                      type="time"
-                      value={format(timeRange.startTime, "HH:mm")}
-                      onChange={(e) => handleTimeRangeChange(e, "startTime")}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition duration-200"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      End Time
-                    </label>
-                    <input
-                      type="time"
-                      value={format(timeRange.endTime, "HH:mm")}
-                      onChange={(e) => handleTimeRangeChange(e, "endTime")}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition duration-200"
-                    />
-                  </div>
+                <div>
+                  <input
+                    type="time"
+                    value={format(time, "HH:mm")}
+                    onChange={handleTimeChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition duration-200"
+                  />
                 </div>
               </div>
 
               {/* Description */}
               <div>
                 <label className="block text-lg font-semibold mb-2">
-                  Tattoo Description
+                  Tattoo Description *
                 </label>
                 <textarea
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition duration-200"
@@ -252,23 +268,53 @@ const TattooAppointment = () => {
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
-            </div>
-          </div>
 
-          {/* Submit Button */}
-          <div className="text-center mt-8">
-            <button
-              type="submit"
-              className="bg-black text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-800 transition duration-300"
-            >
-              Book Appointment
-            </button>
+              {/* Image Upload with Button Icon */}
+              <div>
+                <label className="block text-lg font-semibold mb-2">
+                  Upload Image
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current.click()}
+                    className="flex items-center bg-gray-300 text-black px-4 py-2 rounded-lg focus:ring-2 focus:ring-black"
+                  >
+                    <FiPaperclip className="mr-2" />
+                  </button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  {imagePreview && (
+                    <div className="mt-4">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-72 h-48 object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div>
+                <button
+                  type="submit"
+                  className="w-full bg-black text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-800 transition duration-300"
+                >
+                  Book Appointment
+                </button>
+              </div>
+            </div>
           </div>
         </form>
       </section>
-
-      {/* Toast Notification */}
-      <ToastContainer position="top-right" autoClose={5000} />
+      <ToastContainer />
     </div>
   );
 };

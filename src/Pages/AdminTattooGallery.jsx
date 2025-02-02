@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,34 +15,44 @@ const AdminTattooGallery = () => {
   const [newImage, setNewImage] = useState(null);
   const [description, setDescription] = useState("");
   const containerRef = useRef(null);
+  const navigate = useNavigate(); // Use navigate instead of useHistory
 
+  // Check for admin role on component mount
   useEffect(() => {
-    axios
-      .get(`${BASE_URL}/tattoo-gallery`)
-      .then((response) => {
-        setImages(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching images", error);
-        toast.error("Failed to fetch images");
-      });
+    const userRole = localStorage.getItem("role"); // Assume role is saved in localStorage
 
-    if (containerRef.current) {
-      gsap.from(containerRef.current.children, {
-        opacity: 0,
-        y: 50,
-        stagger: 0.2,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          toggleActions: "play none none reverse",
-        },
-      });
+    if (userRole !== "admin") {
+      // Redirect to a different page if not an admin
+      navigate("/unauthorized"); // Example redirect to unauthorized page
+      toast.error("You do not have access to this page");
+    } else {
+      axios
+        .get(`${BASE_URL}/tattoo-gallery`)
+        .then((response) => {
+          setImages(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching images", error);
+          toast.error("Failed to fetch images");
+        });
+
+      if (containerRef.current) {
+        gsap.from(containerRef.current.children, {
+          opacity: 0,
+          y: 50,
+          stagger: 0.2,
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 80%",
+            end: "bottom 20%",
+            toggleActions: "play none none reverse",
+          },
+        });
+      }
     }
-  }, []);
+  }, [navigate]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];

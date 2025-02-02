@@ -4,10 +4,12 @@ import { login } from "../Utils/api";
 import { Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Eye, EyeOff } from "lucide-react"; // Import icons for password visibility toggle
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false); // State to toggle password visibility
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -15,26 +17,34 @@ const Login = () => {
     try {
       const data = await login({ email, password });
 
-      // Store the token
+      // Ensure we only store simple, safe data in localStorage (avoiding circular references)
+      const userData = {
+        id: data.user.id,
+        name: data.user.name,
+        role: data.user.role,
+      };
+
+      // Store the token and user data
       localStorage.setItem("auth_token", data.access_token);
-      localStorage.setItem("user_id", data.user.id);
+      localStorage.setItem("user_id", userData.id);
+      localStorage.setItem("user_data", JSON.stringify(userData)); // Store user data safely
 
       // Show a success message
-      toast.success(`Welcome, ${data.user.name}!`);
+      toast.success(`Welcome, ${userData.name}!`);
 
       // Redirect based on role
-      if (data.user.role === "admin") {
+      if (userData.role === "admin") {
         window.location.href = "/userlist";
-      } else if (data.user.role === "tattoo_artist") {
+      } else if (userData.role === "tattoo_artist") {
         window.location.href = "/landing";
       } else {
         window.location.href = "/landing";
       }
     } catch (error) {
       if (error.response && error.response.data) {
-        toast.error(`Error: ${error.response.data.message}`);
+        toast.error(`${error.response.data.message}`);
       } else if (error.message) {
-        toast.error(`Error: ${error.message}`);
+        toast.error(` ${error.message}`);
       } else {
         toast.error("An unexpected error occurred");
       }
@@ -65,6 +75,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="Enter your email address"
+                autoComplete="username" // Added autocomplete for email
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
               />
             </div>
@@ -75,16 +86,30 @@ const Login = () => {
               >
                 Password
               </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="Enter your password"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-              />
+              <div className="relative">
+                <input
+                  type={passwordVisible ? "text" : "password"} // Toggle between text and password type
+                  id="password"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Enter your password"
+                  autoComplete="current-password" // Added autocomplete for password
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+                />
+                <button
+                  type="button"
+                  onClick={() => setPasswordVisible(!passwordVisible)} // Toggle password visibility
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
+                >
+                  {passwordVisible ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </div>
             <div className="flex items-center">
               <input

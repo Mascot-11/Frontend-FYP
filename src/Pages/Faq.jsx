@@ -11,7 +11,7 @@ export default function FAQ() {
     { title: "Tattoo", path: "/tatto", icon: Image },
     { title: "Gallery", path: "/gallery", icon: Image },
     { title: "Artists", path: "/artists", icon: Users },
-    { title: "Booking", path: "/Booking", icon: Users },
+    { title: "Appointment", path: "/appointment", icon: Users },
     { title: "FAQs", path: "/faq", icon: Users },
   ];
 
@@ -38,26 +38,31 @@ export default function FAQ() {
     },
   ];
 
-  const muralFaqs = [
+  const musicEventFaqs = [
     {
-      question: "How long does it take to complete a mural?",
+      question: "How can I buy tickets for a music event?",
       answer:
-        "The time to complete a mural depends on its size and complexity. Small murals might take a day or two, while larger ones could take several weeks.",
+        "You can buy tickets for our music events through our website or authorized ticketing partners. Simply choose the event and follow the instructions to purchase your tickets.",
     },
     {
-      question: "Can you paint murals on any surface?",
+      question: "Are tickets refundable?",
       answer:
-        "Most surfaces can be painted, but they may require different preparation techniques. We can work on walls, ceilings, floors, and even unconventional surfaces with proper preparation.",
+        "Tickets are generally non-refundable. However, in case of event cancellation, we will offer a refund or an alternative date, depending on the circumstances.",
     },
     {
-      question: "Do you offer design services for murals?",
+      question: "Can I transfer my ticket to someone else?",
       answer:
-        "Yes, we offer custom design services. We work closely with clients to create unique designs that match their vision and space.",
+        "Yes, you can transfer your ticket to someone else as long as the event allows it. Please check the event's specific policies on ticket transfers before doing so.",
     },
     {
-      question: "How durable are outdoor murals?",
+      question: "What happens if I lose my ticket?",
       answer:
-        "With proper materials and techniques, outdoor murals can last for many years. We use high-quality, weather-resistant paints and apply protective coatings to enhance durability.",
+        "If you lose your ticket, please contact our customer support immediately. We may be able to issue a replacement depending on the event's ticketing system.",
+    },
+    {
+      question: "Are there age restrictions for attending music events?",
+      answer:
+        "Age restrictions vary by event. Please check the event details for age-related information. Some events may be 18+ or have specific age requirements.",
     },
   ];
 
@@ -70,7 +75,7 @@ export default function FAQ() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-gray-900 text-gray-100 filter grayscale">
       {/* Hero Section */}
       <Header navItems={navItems} />
       <motion.section
@@ -80,7 +85,7 @@ export default function FAQ() {
         transition={{ duration: 1 }}
       >
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500"
+          className="absolute inset-0 bg-gradient-to-r from-gray-500 to-gray-700"
           animate={{
             background: [
               "linear-gradient(to right, #8B5CF6, #EC4899)",
@@ -109,7 +114,7 @@ export default function FAQ() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.7, duration: 1 }}
           >
-            Find answers to common questions about tattoos and murals
+            Find answers to common questions about tattoos and music events
           </motion.p>
         </div>
       </motion.section>
@@ -169,9 +174,11 @@ export default function FAQ() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
           >
-            <h2 className="text-3xl font-bold mb-8 text-center">Mural FAQs</h2>
+            <h2 className="text-3xl font-bold mb-8 text-center">
+              Music Events FAQs
+            </h2>
             <div className="space-y-4">
-              {muralFaqs.map((faq, index) => (
+              {musicEventFaqs.map((faq, index) => (
                 <motion.div
                   key={index}
                   className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"

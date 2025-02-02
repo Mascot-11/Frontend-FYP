@@ -18,34 +18,41 @@ export default function LandingPage() {
   const eventSlides = [MusicEvent1, MusicEvent12, MusicEvent13, MusicEvent14];
 
   const nextSlide = (setSlide, slides) => {
-    if (slides.length === 0) return; // Guard against empty slides
+    if (slides.length === 0) return;
     setSlide((prev) => (prev + 1) % slides.length);
   };
 
   const prevSlide = (setSlide, slides) => {
-    if (slides.length === 0) return; // Guard against empty slides
+    if (slides.length === 0) return;
     setSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center">
-      <header className="w-full px-4 lg:px-6 h-14 flex items-center justify-center">
-        <a className="flex items-center justify-center" href="#">
-          <span className="sr-only">REDc</span>
-        </a>
-      </header>
       <main className="flex-1 w-full">
         {/* Hero Section */}
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gray-50">
           <div className="container px-4 md:px-6 mx-auto">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
-                <h1 className="text-3xl font-extrabold tracking-widest sm:text-4xl md:text-5xl lg:text-6xl">
+                <motion.h1
+                  className="text-3xl font-extrabold tracking-widest sm:text-4xl md:text-5xl lg:text-6xl"
+                  initial={{ opacity: 0, y: -50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, ease: "easeInOut" }}
+                >
                   Color Mode
-                </h1>
-                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                  Welcome to Color Mode, your one-stop destination for tattoos,
-                </p>
+                </motion.h1>
+                <motion.p
+                  className="mx-auto max-w-[700px] text-gray-500 md:text-xl"
+                  initial={{ opacity: 0, y: -50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.9, delay: 0.3 }}
+                >
+                  Welcome to Color Mode, where creativity meets artistry.
+                  Discover a place that fuses tattoo artistry with unforgettable
+                  music events.
+                </motion.p>
               </div>
               <div className="space-x-4">
                 <Link
@@ -72,30 +79,54 @@ export default function LandingPage() {
         >
           <div className="container px-4 md:px-6 mx-auto">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  Tattoo Studio
-                </h2>
-                <p className="max-w-[900px] text-gray-500 md:text-xl">
-                  Express yourself with our custom tattoo designs. Our
-                  experienced artists bring your ideas to life.
-                </p>
-              </div>
+              <motion.h2
+                className="text-3xl font-bold tracking-tighter sm:text-5xl"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1, ease: "easeInOut" }}
+              >
+                Tattoo Studio
+              </motion.h2>
+              <motion.p
+                className="max-w-[900px] text-gray-500 md:text-xl"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1, delay: 0.3 }}
+              >
+                Our Tattoo Studio combines skill and creativity to offer you
+                custom-designed tattoos that are as unique as you are. Whether
+                you want something classic or trendy, our professional artists
+                will help bring your vision to life.
+              </motion.p>
+              <motion.p
+                className="max-w-[900px] text-gray-500 md:text-xl"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1, delay: 0.6 }}
+              >
+                From simple designs to complex masterpieces, we pride ourselves
+                on creating high-quality tattoos in a clean, comfortable, and
+                friendly environment. Join us and start your tattoo journey
+                today!
+              </motion.p>
             </div>
+
+            {/* 3D Tattoo Slider */}
             <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-12">
-              <div className="relative w-full h-64 lg:h-96 mx-auto">
-                <AnimatePresence initial={false}>
-                  <motion.img
-                    key={currentTattooSlide}
-                    src={tattooSlides[currentTattooSlide]}
-                    alt={`Tattoo Slide ${currentTattooSlide + 1}`}
-                    className="absolute w-full h-full object-cover rounded-xl"
-                    initial={{ opacity: 0, rotateY: -90 }}
-                    animate={{ opacity: 1, rotateY: 0 }}
-                    exit={{ opacity: 0, rotateY: 90 }}
-                    transition={{ duration: 0.5 }}
-                  />
-                </AnimatePresence>
+              <div className="relative w-full h-64 lg:h-96 mx-auto overflow-hidden">
+                <div className="perspective-1000px">
+                  <AnimatePresence initial={false}>
+                    <motion.img
+                      key={currentTattooSlide}
+                      src={tattooSlides[currentTattooSlide]}
+                      alt={`Tattoo Slide ${currentTattooSlide + 1}`}
+                      className="absolute w-full h-full object-cover rounded-xl transform transition-transform duration-1000 ease-in-out"
+                      initial={{ opacity: 0, rotateY: -50 }}
+                      animate={{ opacity: 1, rotateY: 0 }}
+                      exit={{ opacity: 0, rotateY: 50 }}
+                    />
+                  </AnimatePresence>
+                </div>
                 <button
                   onClick={() => prevSlide(setCurrentTattooSlide, tattooSlides)}
                   className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
@@ -109,11 +140,23 @@ export default function LandingPage() {
                   <ChevronRight size={24} />
                 </button>
               </div>
+
+              {/* Tattoo Info */}
               <div className="flex flex-col justify-center space-y-4">
-                <ul className="grid gap-6">
+                <motion.ul
+                  className="grid gap-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1.2, delay: 0.5 }}
+                >
                   {["Custom Designs", "Expert Artists", "Safe Environment"].map(
                     (item, index) => (
-                      <li key={index}>
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.3 * index }}
+                      >
                         <div className="grid gap-1">
                           <h3 className="text-xl font-bold">{item}</h3>
                           <p className="text-gray-500">
@@ -124,13 +167,13 @@ export default function LandingPage() {
                               : "Sterile equipment and hygienic practices."}
                           </p>
                         </div>
-                      </li>
+                      </motion.li>
                     )
                   )}
-                </ul>
+                </motion.ul>
                 <div className="flex justify-center">
                   <Link
-                    to="/Booking"
+                    to="/appointment"
                     className="inline-flex h-9 items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950"
                   >
                     Book Now
@@ -148,30 +191,45 @@ export default function LandingPage() {
         >
           <div className="container px-4 md:px-6 mx-auto">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  Music Events
-                </h2>
-                <p className="max-w-[900px] text-gray-500 md:text-xl">
-                  Experience unforgettable music events, featuring local and
-                  international artists. Come and vibe with us!
-                </p>
-              </div>
+              <motion.h2
+                className="text-3xl font-bold tracking-tighter sm:text-5xl"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1, ease: "easeInOut" }}
+              >
+                Music Events
+              </motion.h2>
+              <motion.p
+                className="max-w-[900px] text-gray-500 md:text-xl"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1, delay: 0.3 }}
+              >
+                Color Mode is not just a place for tattoos, it's also your
+                gateway to unforgettable live music events. From live bands to
+                DJ nights, we bring a variety of performances to keep you
+                grooving all night long. Our venue is designed for music lovers
+                who appreciate great sound, stunning visuals, and an
+                electrifying atmosphere.
+              </motion.p>
             </div>
+
+            {/* 3D Music Event Slider */}
             <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-12">
-              <div className="relative w-full h-64 lg:h-96 mx-auto">
-                <AnimatePresence initial={false}>
-                  <motion.img
-                    key={currentEventSlide}
-                    src={eventSlides[currentEventSlide]}
-                    alt={`Event Slide ${currentEventSlide + 1}`}
-                    className="absolute w-full h-full object-cover rounded-xl"
-                    initial={{ opacity: 0, rotateY: -90 }}
-                    animate={{ opacity: 1, rotateY: 0 }}
-                    exit={{ opacity: 0, rotateY: 90 }}
-                    transition={{ duration: 0.5 }}
-                  />
-                </AnimatePresence>
+              <div className="relative w-full h-64 lg:h-96 mx-auto overflow-hidden">
+                <div className="perspective-1000px">
+                  <AnimatePresence initial={false}>
+                    <motion.img
+                      key={currentEventSlide}
+                      src={eventSlides[currentEventSlide]}
+                      alt={`Event Slide ${currentEventSlide + 1}`}
+                      className="absolute w-full h-full object-cover rounded-xl transform transition-transform duration-1000 ease-in-out"
+                      initial={{ opacity: 0, rotateY: -50 }}
+                      animate={{ opacity: 1, rotateY: 0 }}
+                      exit={{ opacity: 0, rotateY: 50 }}
+                    />
+                  </AnimatePresence>
+                </div>
                 <button
                   onClick={() => prevSlide(setCurrentEventSlide, eventSlides)}
                   className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
@@ -185,33 +243,45 @@ export default function LandingPage() {
                   <ChevronRight size={24} />
                 </button>
               </div>
+
+              {/* Event Info */}
               <div className="flex flex-col justify-center space-y-4">
-                <ul className="grid gap-6">
+                <motion.ul
+                  className="grid gap-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1.2, delay: 0.5 }}
+                >
                   {[
                     "Live Performances",
                     "Vibrant Atmosphere",
-                    "Diverse Music Genres",
+                    "Wide Range of Genres",
                   ].map((item, index) => (
-                    <li key={index}>
+                    <motion.li
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 * index }}
+                    >
                       <div className="grid gap-1">
                         <h3 className="text-xl font-bold">{item}</h3>
                         <p className="text-gray-500">
                           {item === "Live Performances"
-                            ? "Enjoy live shows by talented artists."
+                            ? "Experience your favorite artists live."
                             : item === "Vibrant Atmosphere"
-                            ? "Feel the energy and excitement of our events."
-                            : "From rock to EDM, we’ve got it all."}
+                            ? "Vibrant lights, crowd, and music."
+                            : "Genres for every music lover."}
                         </p>
                       </div>
-                    </li>
+                    </motion.li>
                   ))}
-                </ul>
+                </motion.ul>
                 <div className="flex justify-center">
                   <Link
-                    to="/Booking"
+                    to="/events"
                     className="inline-flex h-9 items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950"
                   >
-                    Book Now
+                    Book Tickets
                   </Link>
                 </div>
               </div>

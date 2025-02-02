@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react"; // Import other icons as needed
+import { Menu, X, ChevronLeft } from "lucide-react"; // Import the ChevronLeft icon
 
 const Subnav = ({ backButton = true, navItems }) => {
   const navigate = useNavigate();
@@ -22,9 +22,9 @@ const Subnav = ({ backButton = true, navItems }) => {
           {backButton && (
             <button
               onClick={handleBackClick}
-              className="text-white py-2 px-4 rounded transition duration-300"
+              className="text-white p-2 rounded-md hover:text-gray-300 hover:bg-gray-700 transition duration-300"
             >
-              Back
+              <ChevronLeft className="h-6 w-6" aria-hidden="true" />
             </button>
           )}
           <div className="flex items-center">

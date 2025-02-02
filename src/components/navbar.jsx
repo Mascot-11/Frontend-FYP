@@ -1,4 +1,5 @@
-import React, { useState } from "react"; // Import useState
+// navbar.jsx
+import React, { useState } from "react"; // Add useState here
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -9,21 +10,22 @@ import {
   LogIn,
   X,
   Menu,
-} from "lucide-react"; // Ensure all icons are imported
-
+} from "lucide-react";
 const NavBar = ({ isUserLoggedIn, onLogin, onLogout, user }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [
     { to: "/landing", text: "Home", icon: Home },
     { to: "/tattoo", text: "Tattoo", icon: Palette },
     { to: "/music", text: "Music", icon: Music },
-
+    ...(isUserLoggedIn
+      ? [{ to: "/myappointments", text: "My Appointments", icon: Image }]
+      : []), // Conditionally add 'My Appointments'
     ...(isUserLoggedIn
       ? [{ to: "/login", text: "Logout", icon: LogIn, onClick: onLogout }]
       : [
           { to: "/register", text: "Register", icon: UserPlus },
           { to: "/login", text: "Login", icon: LogIn, onClick: onLogin },
-        ]), // Login/Register based on authentication status
+        ]),
   ];
 
   return (
@@ -90,5 +92,4 @@ const NavBar = ({ isUserLoggedIn, onLogin, onLogout, user }) => {
     </nav>
   );
 };
-
 export default NavBar;
