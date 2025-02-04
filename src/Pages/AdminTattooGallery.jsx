@@ -19,7 +19,7 @@ const AdminTattooGallery = () => {
 
   // Check for admin role on component mount
   useEffect(() => {
-    const userRole = localStorage.getItem("role"); // Assume role is saved in localStorage
+    const userRole = localStorage.getItem("user_role"); // Assume role is saved in localStorage
 
     if (userRole !== "admin") {
       // Redirect to a different page if not an admin

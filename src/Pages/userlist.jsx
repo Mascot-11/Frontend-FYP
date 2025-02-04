@@ -1,6 +1,39 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getUsers, deleteUser, addUser, updateUser } from "../Utils/api";
 import { Pencil, Trash2, Plus, Eye, EyeOff } from "lucide-react";
+
+// Custom Button Component
+const Button = ({
+  children,
+  className = "",
+  variant = "primary",
+  size = "default",
+  disabled = false,
+  onClick,
+  ...props
+}) => {
+  const baseStyles =
+    "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50";
+  const variants = {
+    primary: "bg-black text-white hover:bg-gray-800",
+    secondary: "bg-gray-100 hover:bg-gray-200 text-gray-900",
+  };
+  const sizes = {
+    default: "h-9 px-4 py-2",
+    icon: "h-9 w-9",
+  };
+
+  return (
+    <button
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+      disabled={disabled}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -11,7 +44,7 @@ const UserList = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "", // Add role field
+    role: "",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editUser, setEditUser] = useState(null);
@@ -37,11 +70,10 @@ const UserList = () => {
   }, []);
 
   const handleAddUser = async () => {
-    // Validate the form fields
     if (
       !newUser.name ||
       !newUser.email ||
-      !newUser.role || // Role must be selected
+      !newUser.role ||
       (!isEditing && (!newUser.password || !newUser.confirmPassword))
     ) {
       setError("All fields are required");
@@ -59,7 +91,7 @@ const UserList = () => {
         const updatedUser = await updateUser(editUser.id, {
           name: newUser.name,
           email: newUser.email,
-          role: newUser.role, // Update role
+          role: newUser.role,
         });
         setUsers(
           users.map((user) => (user.id === updatedUser.id ? updatedUser : user))
@@ -70,11 +102,17 @@ const UserList = () => {
           email: newUser.email,
           password: newUser.password,
           password_confirmation: newUser.confirmPassword,
-          role: newUser.role, // Send role when adding user
+          role: newUser.role,
         });
         setUsers([...users, addedUser]);
       }
-      setNewUser({ name: "", email: "", password: "", confirmPassword: "" });
+      setNewUser({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        role: "",
+      });
       setIsSubmitting(false);
       setShowForm(false);
       setIsEditing(false);
@@ -96,7 +134,7 @@ const UserList = () => {
       email: user.email,
       password: "",
       confirmPassword: "",
-      role: user.role, // Set the role for editing
+      role: user.role,
     });
     setShowForm(true);
   };
@@ -118,27 +156,29 @@ const UserList = () => {
     return new Date(date).toLocaleDateString(undefined, options);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto p-4 bg-white min-h-screen">
-      <h2 className="text-3xl font-bold mb-8 text-center text-gray-900">
-        User List
-      </h2>
+    <div className="w-full max-w-6xl mx-auto bg-white rounded-lg shadow-sm border">
+      {/* Card Header */}
+      <div className="px-6 py-4 border-b flex items-center justify-between">
+        <h2 className="text-2xl font-semibold">User List</h2>
+        <Button onClick={() => setShowForm(true)} disabled={showForm}>
+          <Plus className="w-4 h-4 mr-2" /> Add New User
+        </Button>
+      </div>
 
-      <div className="mb-6">
-        {showForm ? (
-          <div className="bg-gray-200 p-4 shadow-lg">
+      {/* Card Content */}
+      <div className="p-6">
+        {error && (
+          <div className="bg-red-500 text-white p-3 mb-4 rounded">
+            <p>{error}</p>
+          </div>
+        )}
+
+        {showForm && (
+          <div className="bg-gray-100 p-4 rounded-lg mb-6">
             <h3 className="text-xl font-semibold mb-4">
               {isEditing ? "Edit User" : "Add User"}
             </h3>
-            {error && <div className="text-red-600 mb-4">{error}</div>}
             <input
               type="text"
               value={newUser.name}
@@ -167,7 +207,7 @@ const UserList = () => {
             </select>
             {!isEditing && (
               <>
-                <div className="relative">
+                <div className="relative mb-4">
                   <input
                     type={showPassword ? "text" : "password"}
                     value={newUser.password}
@@ -175,17 +215,17 @@ const UserList = () => {
                       setNewUser({ ...newUser, password: e.target.value })
                     }
                     placeholder="Password"
-                    className="w-full px-4 py-2 border rounded-md mb-4 pr-10"
+                    className="w-full px-4 py-2 border rounded-md pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-2 flex items-center"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
-                <div className="relative">
+                <div className="relative mb-4">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     value={newUser.confirmPassword}
@@ -196,7 +236,7 @@ const UserList = () => {
                       })
                     }
                     placeholder="Confirm Password"
-                    className="w-full px-4 py-2 border rounded-md mb-4 pr-10"
+                    className="w-full px-4 py-2 border rounded-md pr-10"
                   />
                   <button
                     type="button"
@@ -212,17 +252,9 @@ const UserList = () => {
                 </div>
               </>
             )}
-            <div className="flex justify-between">
-              <button
-                onClick={handleAddUser}
-                className={`px-4 py-2 ${
-                  isSubmitting ? "bg-gray-400" : "bg-black"
-                } text-white rounded-md`}
-                disabled={isSubmitting}
-              >
-                {isEditing ? "Update" : "Add"} User
-              </button>
-              <button
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="secondary"
                 onClick={() => {
                   setShowForm(false);
                   setIsEditing(false);
@@ -235,99 +267,85 @@ const UserList = () => {
                   });
                   setError(null);
                 }}
-                className="px-4 py-2 bg-gray-300 text-black rounded-md"
               >
                 Cancel
-              </button>
+              </Button>
+              <Button onClick={handleAddUser} disabled={isSubmitting}>
+                {isEditing ? "Update" : "Add"} User
+              </Button>
             </div>
           </div>
-        ) : (
-          <button
-            onClick={() => setShowForm(true)}
-            className="px-4 py-2 bg-black text-white rounded-md flex items-center"
-          >
-            <Plus size={20} className="mr-2" /> Add New User
-          </button>
         )}
-      </div>
 
-      <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
-        <table className="min-w-full table-auto">
-          <thead className="bg-black text-white">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                S.N
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                Email
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                Role
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                Created At
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                Updated At
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.length > 0 ? (
-              users.map((user, index) => (
-                <tr
-                  key={user.id}
-                  className="border-b border-gray-200 hover:bg-gray-100 transition duration-300"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {index + 1}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {user.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {user.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {user.role}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDate(user.created_at)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDate(user.updated_at)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => handleEditUser(user)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteUser(user.id)}
-                      className="text-red-600 hover:text-red-800 ml-4"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
+        {loading ? (
+          <div className="flex justify-center items-center p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-black"></div>
+          </div>
+        ) : users.length === 0 ? (
+          <p className="text-gray-600 text-center p-8">No users available.</p>
+        ) : (
+          <div className="relative overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-black text-white">
+                  <th className="text-left p-3 font-medium">S.N</th>
+                  <th className="text-left p-3 font-medium">NAME</th>
+                  <th className="text-left p-3 font-medium">EMAIL</th>
+                  <th className="text-left p-3 font-medium">ROLE</th>
+                  <th className="text-left p-3 font-medium">CREATED AT</th>
+                  <th className="text-left p-3 font-medium">UPDATED AT</th>
+                  <th className="text-left p-3 font-medium">ACTIONS</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="px-6 py-4 text-center">
-                  No users found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {users.map((user, index) => (
+                  <tr
+                    key={user.id}
+                    className="border-b hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="p-3">{index + 1}</td>
+                    <td className="p-3">{user.name}</td>
+                    <td className="p-3">{user.email}</td>
+                    <td className="p-3">
+                      <span
+                        className={`inline-block px-2 py-1 rounded text-sm ${
+                          user.role === "admin"
+                            ? "bg-purple-100 text-purple-800"
+                            : user.role === "tattoo_artist"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="p-3">{formatDate(user.created_at)}</td>
+                    <td className="p-3">{formatDate(user.updated_at)}</td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={() => handleEditUser(user)}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          className="bg-gray-200 hover:bg-gray-300"
+                          onClick={() => handleDeleteUser(user.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

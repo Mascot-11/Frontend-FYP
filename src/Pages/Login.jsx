@@ -34,7 +34,7 @@ const Login = () => {
 
       // Redirect based on role
       if (userData.role === "admin") {
-        window.location.href = "/userlist";
+        window.location.href = "/landing";
       } else if (userData.role === "tattoo_artist") {
         window.location.href = "/landing";
       } else {
