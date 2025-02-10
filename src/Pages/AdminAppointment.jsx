@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import {  Trash2, CheckCircle, XCircle } from "lucide-react";
 import {
   fetchAppointments,
   updateAppointmentStatus,
@@ -143,17 +143,36 @@ const AdminAppointments = () => {
                     </td>
                     <td className="p-3">
                       <div className="flex items-center gap-2">
-                        {/* Update Status Button */}
+                        {/* Confirm Button */}
                         <Button
                           variant="secondary"
                           size="icon"
                           onClick={() =>
                             handleUpdateStatus(appointment.id, "confirmed")
                           }
-                          disabled={appointment.status === "confirmed"}
+                          disabled={
+                            appointment.status === "confirmed" ||
+                            appointment.status === "canceled"
+                          }
                         >
-                          <Pencil className="w-4 h-4" />
+                          <CheckCircle className="w-4 h-4 text-green-600" />
                         </Button>
+
+                        {/* Cancel Button */}
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={() =>
+                            handleUpdateStatus(appointment.id, "canceled")
+                          }
+                          disabled={
+                            appointment.status === "canceled" ||
+                            appointment.status === "confirmed"
+                          }
+                        >
+                          <XCircle className="w-4 h-4 text-red-600" />
+                        </Button>
+
                         {/* Delete Appointment Button */}
                         <Button
                           variant="secondary"
