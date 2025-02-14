@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 import { forgotPassword } from "../Utils/api"; // Ensure this function is implemented
 

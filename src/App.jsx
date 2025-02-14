@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -25,6 +25,14 @@ import FAQ from "./Pages/Faq";
 import { login } from "./Utils/api";
 import TattooGallery from "./Pages/TattooGallery";
 import AdminTattooGallery from "./Pages/AdminTattooGallery";
+// Import Event-related Pages
+import EventViewPage from "./Pages/EventViewPage";
+import EventCrudPage from "./Pages/EventCrudPage";
+import EventEditPage from "./Pages/EventEditPage";
+// Import Ticket Purchase Pages
+import TicketPurchase from "./Pages/TicketPurchase";
+import PaymentSuccess from "./components/PaymentSuccess";
+import TicketConfirmation from "./Pages/TicketConfirmation";
 
 const App = () => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
@@ -96,13 +104,26 @@ const App = () => {
             <Route path="/tattoo" element={<Tattoo />} />
             <Route path="/admin/users" element={<UserList />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
-            <Route path="/Faq" element={<FAQ />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/admin/appointments" element={<AppointmentsList />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/resetpassword" element={<ResetPassword />} />
             <Route path="/appointment" element={<AppointmentPage />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/gallery" element={<TattooGallery />} />
+            <Route path="/events" element={<EventCrudPage />} />
+            <Route path="/events/:eventId/edit" element={<EventEditPage />} />
+            <Route path="/events/:eventId" element={<EventViewPage />} />
+            {/* Corrected the route for ticket purchase */}
+            <Route
+              path="/ticket-purchase/:eventId"
+              element={<TicketPurchase />}
+            />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route
+              path="/ticket-confirmation"
+              element={<TicketConfirmation />}
+            />
             <Route
               path="/myappointments"
               element={

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Echo from "laravel-echo";
-
+import Pusher from "pusher-js";
 const BASE_URL = "http://127.0.0.1:8000/";
 
 const ChatApp = () => {

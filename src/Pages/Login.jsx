@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../Utils/api";
 import { Link } from "react-router-dom";
@@ -144,7 +144,7 @@ const Login = () => {
           </div>
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
+              Dont have an account?{" "}
               <Link
                 to="/register"
                 className="font-medium text-black hover:underline"
