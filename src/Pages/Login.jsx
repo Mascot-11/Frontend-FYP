@@ -10,7 +10,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false); // State to toggle password visibility
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Declare navigate hook
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -32,13 +32,13 @@ const Login = () => {
       // Show a success message
       toast.success(`Welcome, ${userData.name}!`);
 
-      // Redirect based on role
+      // Redirect based on role using navigate
       if (userData.role === "admin") {
-        window.location.href = "/landing";
+        navigate("/landing"); // Redirect to landing page for admin
       } else if (userData.role === "tattoo_artist") {
-        window.location.href = "/landing";
+        navigate("/landing"); // Redirect to landing page for tattoo artist
       } else {
-        window.location.href = "/landing";
+        navigate("/landing"); // Redirect to landing page for regular users
       }
     } catch (error) {
       if (error.response && error.response.data) {

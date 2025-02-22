@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Image, Users, ChevronUp, ChevronDown } from "lucide-react";
 import Header from "../components/subnavbar";

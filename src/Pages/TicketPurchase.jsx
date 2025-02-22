@@ -10,8 +10,8 @@ const TicketPurchasePage = () => {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState("esewa");
 
+  // Fetch Event Details
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -28,14 +28,26 @@ const TicketPurchasePage = () => {
     fetchEvent();
   }, [eventId]);
 
+  // Handle Ticket Purchase
   const handlePurchase = async () => {
     try {
+      const userData = JSON.parse(localStorage.getItem("user_data")) || {};
+
       const response = await axios.post(
         "/api/tickets/purchase",
         {
           event_id: eventId,
+          event_name: event.name,
+          event_date: event.date,
+          event_price: event.price,
+          available_tickets: event.available_tickets,
+          event_description: event.description,
+          event_image: event.image_url,
           quantity,
-          payment_method: paymentMethod,
+          payment_method: "khalti",
+          user_id: userData.id,
+          user_name: userData.name,
+          user_role: userData.role,
         },
         {
           headers: {
@@ -43,20 +55,20 @@ const TicketPurchasePage = () => {
           },
         }
       );
-      if (response.data.esewa_url) {
-        // Redirect to eSewa
-        window.location.href = response.data.esewa_url;
+      // ✅ Redirecting user from frontend instead of Laravel
+      if (response.data.khalti_url) {
+        window.location.href = response.data.khalti_url; // Open Khalti payment page
       }
     } catch (error) {
       console.error("Error purchasing ticket:", error);
     }
   };
 
+  // Handle Khalti Payment Success
   const handlePaymentSuccess = async (paymentData) => {
     try {
-      // Send payment data to verify payment with backend
       const response = await axios.post(
-        "/api/tickets/verify-esewa-payment",
+        "/api/tickets/verify-khalti-payment",
         paymentData,
         {
           headers: {
@@ -64,8 +76,8 @@ const TicketPurchasePage = () => {
           },
         }
       );
+
       if (response.data.message === "Payment successful") {
-        // Navigate to the user's tickets page or show ticket details
         navigate(`/tickets/${response.data.ticket.id}`);
       } else {
         alert("Payment verification failed");
@@ -76,19 +88,17 @@ const TicketPurchasePage = () => {
     }
   };
 
+  // Check Khalti Payment Status from URL
   useEffect(() => {
-    // Check if eSewa payment was successful
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get("status");
     if (paymentStatus === "success") {
       const paymentData = {
-        txnid: params.get("txnid"),
+        pidx: params.get("pidx"),
         amount: params.get("amount"),
-        email: params.get("email"),
-        firstname: params.get("firstname"),
-        lastname: params.get("lastname"),
-        phone: params.get("phone"),
-        // Add any other payment parameters you need
+        mobile: params.get("mobile"),
+        purchase_order_id: params.get("purchase_order_id"),
+        purchase_order_name: params.get("purchase_order_name"),
       };
       handlePaymentSuccess(paymentData);
     }
@@ -152,18 +162,6 @@ const TicketPurchasePage = () => {
             max={event.available_tickets}
           />
         </div>
-
-        <div className="flex justify-between items-center">
-          <label className="text-lg text-gray-800">Payment Method</label>
-          <select
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            className="p-2 border rounded-md"
-          >
-            <option value="esewa">eSewa</option>
-            <option value="khalti">Khalti</option>
-          </select>
-        </div>
       </div>
 
       <motion.div
@@ -176,7 +174,7 @@ const TicketPurchasePage = () => {
           onClick={handlePurchase}
           className="px-8 py-3 bg-indigo-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-300"
         >
-          Purchase Ticket
+          Purchase Ticket via Khalti
         </button>
       </motion.div>
     </motion.div>

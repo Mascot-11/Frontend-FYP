@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+
 import axios from "axios";
 import {
   XAxis,
@@ -14,14 +16,13 @@ import {
   Bar,
   Legend,
 } from "recharts";
-
 import {
-  FaUsers,
-  FaClipboardList,
-  FaImages,
-  FaComments,
-  FaPaintBrush,
-} from "react-icons/fa";
+  Users,
+  Calendar,
+  Image as ImageIcon,
+  MessageCircle,
+  Brush,
+} from "lucide-react";
 import { ClimbingBoxLoader } from "react-spinners";
 import { motion } from "framer-motion";
 
@@ -42,7 +43,7 @@ const Dashboard = () => {
   });
 
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -168,7 +169,20 @@ const Dashboard = () => {
     fetchStats();
   }, []);
 
-  const chartColors = ["#4CAF50", "#2196F3", "#FFC107", "#E91E63", "#9C27B0"];
+  const chartColors = {
+    primary: "#8b5cf6",
+    secondary: "#ec4899",
+    tertiary: "#06b6d4",
+    quaternary: "#f59e0b",
+    accent1: "#22c55e",
+    accent2: "#ef4444",
+    background: "#111827",
+    cardBg: "#ffffff",
+    text: "#f3f4f6",
+    muted: "#9ca3af",
+  };
+
+  const pieColors = ["#8b5cf6", "#ec4899", "#06b6d4", "#f59e0b", "#22c55e"];
 
   const pieData = [
     { name: "Confirmed", value: stats.appointmentStatus.confirmed },
@@ -176,112 +190,103 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-900">
       {loading ? (
         <div className="flex justify-center items-center min-h-screen">
-          <ClimbingBoxLoader color="#000" size={50} />
+          <ClimbingBoxLoader color={chartColors.primary} size={30} />
         </div>
       ) : (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="space-y-8"
+          className="container mx-auto px-4 py-8"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <StatsCard
-                title="Total Users"
-                value={stats.totalUsers}
-                icon={<FaUsers />}
-                color="#4CAF50"
-              />
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <StatsCard
-                title="Appointments"
-                value={stats.totalAppointments}
-                icon={<FaClipboardList />}
-                color="#2196F3"
-              />
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <StatsCard
-                title="Gallery Items"
-                value={stats.totalImages}
-                icon={<FaImages />}
-                color="#FFC107"
-              />
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <StatsCard
-                title="Active Chats"
-                value={stats.ongoingChats}
-                icon={<FaComments />}
-                color="#E91E63"
-              />
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <StatsCard
-                title="Tattoo Artists"
-                value={stats.totalArtists}
-                icon={<FaPaintBrush />}
-                color="#9C27B0"
-                onClick={() => setShowModal(true)}
-              />
-            </motion.div>
+          <h1 className="text-3xl font-bold text-gray-100 mb-8">
+            Dashboard Overview
+          </h1>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <StatsCard
+              title="Total Users"
+              value={stats.totalUsers}
+              icon={<Users className="w-6 h-6" />}
+              color={chartColors.primary}
+            />
+            <StatsCard
+              title="Appointments"
+              value={stats.totalAppointments}
+              icon={<Calendar className="w-6 h-6" />}
+              color={chartColors.secondary}
+            />
+            <StatsCard
+              title="Gallery Items"
+              value={stats.totalImages}
+              icon={<ImageIcon className="w-6 h-6" />}
+              color={chartColors.tertiary}
+            />
+            <StatsCard
+              title="Active Chats"
+              value={stats.ongoingChats}
+              icon={<MessageCircle className="w-6 h-6" />}
+              color={chartColors.quaternary}
+            />
+            <StatsCard
+              title="Artists"
+              value={stats.totalArtists}
+              icon={<Brush className="w-6 h-6" />}
+              color={chartColors.accent1}
+              onClick={() => setShowModal(true)}
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-xl shadow-sm p-4"
+              className="bg-white rounded-2xl shadow-lg p-6"
             >
-              <h2 className="text-lg font-medium mb-6">
-                User Registrations (Last 3 Months)
+              <h2 className="text-lg font-semibold text-gray-800 mb-6">
+                User Growth
               </h2>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={stats.userRegistrations}>
-                  <XAxis dataKey="date" stroke="#94a3b8" />
-                  <YAxis stroke="#94a3b8" />
-                  <Tooltip />
+                  <XAxis
+                    dataKey="date"
+                    stroke={chartColors.muted}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis stroke={chartColors.muted} tick={{ fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                    }}
+                  />
                   <Line
                     type="monotone"
                     dataKey="registrations"
-                    stroke="#2563eb"
+                    stroke={chartColors.primary}
                     strokeWidth={2}
                     dot={false}
-                    animationDuration={2000}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-xl shadow-sm p-4"
+              className="bg-white rounded-2xl shadow-lg p-6"
             >
-              <h2 className="text-lg font-medium mb-6">Appointment Status</h2>
-              <ResponsiveContainer width="100%" height={200}>
+              <h2 className="text-lg font-semibold text-gray-800 mb-6">
+                Appointment Status
+              </h2>
+              <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={pieData}
@@ -289,36 +294,66 @@ const Dashboard = () => {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={80}
-                    animationDuration={2000}
+                    outerRadius={100}
+                    innerRadius={60}
                   >
                     {pieData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={chartColors[index % chartColors.length]}
+                        fill={pieColors[index % pieColors.length]}
                       />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                    }}
+                  />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    iconType="circle"
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white rounded-xl shadow-sm p-4"
+              className="bg-white rounded-2xl shadow-lg p-6"
             >
-              <h2 className="text-lg font-medium mb-6">Artist Popularity</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-6">
+                Artist Performance
+              </h2>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={stats.artistsPopularity}>
-                  <XAxis dataKey="artistName" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="appointments" fill="#2563eb" />
+                  <XAxis
+                    dataKey="artistName"
+                    stroke={chartColors.muted}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis stroke={chartColors.muted} tick={{ fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                    }}
+                  />
+                  <Bar dataKey="appointments" radius={[4, 4, 0, 0]}>
+                    {stats.artistsPopularity.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={pieColors[index % pieColors.length]}
+                      />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </motion.div>
@@ -329,26 +364,34 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
-
 const StatsCard = ({ title, value, icon, color, onClick }) => {
   return (
-    <div
-      className={`bg-white p-6 rounded-xl shadow-md hover:shadow-lg cursor-pointer transition-all duration-300 ${color}`}
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      className="bg-white rounded-2xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow duration-300"
       onClick={onClick}
     >
-      <div className="flex items-center">
+      <div className="flex items-center space-x-4">
         <div
-          className="w-12 h-12 bg-white flex justify-center items-center rounded-full shadow-md mr-4"
-          style={{ backgroundColor: color }}
+          className="p-3 rounded-xl"
+          style={{ backgroundColor: `${color}15` }}
         >
-          {icon}
+          <div style={{ color }}>{icon}</div>
         </div>
         <div>
-          <h3 className="text-xl font-semibold">{title}</h3>
-          <p className="text-2xl font-bold">{value}</p>
+          <p className="text-sm font-medium text-gray-600">{title}</p>
+          <p className="text-2xl font-bold text-gray-800">{value}</p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
+StatsCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  value: PropTypes.number.isRequired,
+  icon: PropTypes.node.isRequired,
+  color: PropTypes.string.isRequired,
+  onClick: PropTypes.func,
+};
+
+export default Dashboard;

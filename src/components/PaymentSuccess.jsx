@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom"; // useNavigate instead of useHistory
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const PaymentSuccess = () => {
   const location = useLocation();
-  const navigate = useNavigate(); // useNavigate instead of useHistory
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
-    // Capture query parameters from the URL
     const queryParams = new URLSearchParams(location.search);
     const paymentStatus = queryParams.get("status");
     const refId = queryParams.get("refId");
@@ -19,7 +18,6 @@ const PaymentSuccess = () => {
     const quantity = queryParams.get("quantity");
 
     if (paymentStatus === "Success") {
-      // Send payment details to backend for verification
       axios
         .post("/api/verify-esewa", {
           amount,
@@ -28,19 +26,21 @@ const PaymentSuccess = () => {
           event_id,
           quantity,
         })
-        .then((response) => {
+        .then(() => {
           setLoading(false);
           setStatusMessage(
             "Payment Verified Successfully! Your ticket is confirmed."
           );
-          // Redirect to a ticket confirmation page or show ticket info
           setTimeout(() => {
-            navigate("/ticket-confirmation"); // use navigate instead of history.push
+            navigate("/ticket-confirmation");
           }, 3000);
         })
         .catch((error) => {
           setLoading(false);
-          setStatusMessage("Payment Verification Failed. Please try again.");
+          setStatusMessage(
+            error.response?.data?.message ||
+              "Payment Verification Failed. Please try again."
+          );
           console.error("Payment Verification Error: ", error);
         });
     } else {
@@ -49,7 +49,7 @@ const PaymentSuccess = () => {
         "Payment Failed! Please check your payment and try again."
       );
     }
-  }, [location, navigate]); // Change history to navigate
+  }, [location, navigate]);
 
   return (
     <div className="payment-status-container">
@@ -59,8 +59,7 @@ const PaymentSuccess = () => {
       ) : (
         <div>
           <p>{statusMessage}</p>
-          <button onClick={() => navigate("/")}>Go Back to Home</button>{" "}
-          {/* use navigate instead of history.push */}
+          <button onClick={() => navigate("/")}>Go Back to Home</button>
         </div>
       )}
     </div>

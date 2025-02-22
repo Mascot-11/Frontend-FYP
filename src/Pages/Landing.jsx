@@ -205,7 +205,7 @@ export default function LandingPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 1, delay: 0.3 }}
               >
-                Color Mode is not just a place for tattoos, it's also your
+                Color Mode is not just a place for tattoos, its also your
                 gateway to unforgettable live music events. From live bands to
                 DJ nights, we bring a variety of performances to keep you
                 grooving all night long. Our venue is designed for music lovers

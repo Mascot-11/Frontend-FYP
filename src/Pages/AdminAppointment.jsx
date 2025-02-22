@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Trash2, CheckCircle, XCircle } from "lucide-react";
+import PropTypes from "prop-types";
+import { Trash2, CheckCircle, XCircle, Eye } from "lucide-react";
 import {
   fetchAppointments,
   updateAppointmentStatus,
@@ -39,10 +40,20 @@ const Button = ({
   );
 };
 
+Button.propTypes = {
+  children: PropTypes.node.isRequired,
+  className: PropTypes.string,
+  variant: PropTypes.oneOf(["primary", "secondary"]),
+  size: PropTypes.oneOf(["default", "icon"]),
+  disabled: PropTypes.bool,
+  onClick: PropTypes.func,
+};
+
 const AdminAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,6 +93,14 @@ const AdminAppointments = () => {
     }
   };
 
+  const handleImageModalOpen = (imageUrl) => {
+    setSelectedImage(imageUrl);
+  };
+
+  const handleImageModalClose = () => {
+    setSelectedImage(null);
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto bg-white rounded-lg shadow-sm border">
       {/* Card Header */}
@@ -115,6 +134,7 @@ const AdminAppointments = () => {
                   <th className="text-left p-3 font-medium">ARTIST</th>
                   <th className="text-left p-3 font-medium">DATE & TIME</th>
                   <th className="text-left p-3 font-medium">STATUS</th>
+                  <th className="text-left p-3 font-medium">IMAGE</th>
                   <th className="text-left p-3 font-medium">ACTIONS</th>
                 </tr>
               </thead>
@@ -140,6 +160,21 @@ const AdminAppointments = () => {
                       >
                         {appointment.status}
                       </span>
+                    </td>
+                    <td className="p-3">
+                      {appointment.image_url ? (
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={() =>
+                            handleImageModalOpen(appointment.image_url)
+                          }
+                        >
+                          <Eye className="w-4 h-4 text-gray-600" />
+                        </Button>
+                      ) : (
+                        <span>No Image</span>
+                      )}
                     </td>
                     <td className="p-3">
                       <div className="flex items-center gap-2">
@@ -193,6 +228,24 @@ const AdminAppointments = () => {
           </div>
         )}
       </div>
+
+      {/* Modal for Image */}
+      {selectedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg max-w-3xl w-full">
+            <div className="flex justify-end">
+              <Button onClick={handleImageModalClose} size="icon">
+                <XCircle className="w-6 h-6 text-red-600" />
+              </Button>
+            </div>
+            <img
+              src={selectedImage}
+              alt="Appointment"
+              className="w-full max-h-96 object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

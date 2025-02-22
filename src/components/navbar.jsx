@@ -1,5 +1,5 @@
-// navbar.jsx
-import React, { useState } from "react"; // Add useState here
+import { useState } from "react";
+import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -11,15 +11,17 @@ import {
   X,
   Menu,
 } from "lucide-react";
-const NavBar = ({ isUserLoggedIn, onLogin, onLogout, user }) => {
+
+const NavBar = ({ isUserLoggedIn, onLogin, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const menuItems = [
     { to: "/landing", text: "Home", icon: Home },
     { to: "/tattoo", text: "Tattoo", icon: Palette },
     { to: "/music", text: "Music", icon: Music },
     ...(isUserLoggedIn
       ? [{ to: "/myappointments", text: "My Appointments", icon: Image }]
-      : []), // Conditionally add 'My Appointments'
+      : []),
     ...(isUserLoggedIn
       ? [{ to: "/login", text: "Logout", icon: LogIn, onClick: onLogout }]
       : [
@@ -37,7 +39,7 @@ const NavBar = ({ isUserLoggedIn, onLogin, onLogout, user }) => {
             Color Mode
           </Link>
 
-          {/* Hamburger menu for small screens */}
+          {/* Mobile Menu Button */}
           <button
             className="md:hidden text-white hover:text-gray-400 focus:outline-none"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -49,7 +51,7 @@ const NavBar = ({ isUserLoggedIn, onLogin, onLogout, user }) => {
             )}
           </button>
 
-          {/* Menu items (hidden on small screens) */}
+          {/* Desktop Menu */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
               {menuItems.map((item) => (
@@ -57,7 +59,7 @@ const NavBar = ({ isUserLoggedIn, onLogin, onLogout, user }) => {
                   key={item.to}
                   to={item.to}
                   className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300"
-                  onClick={item.onClick}
+                  onClick={item.onClick} // FIXED: No automatic logout
                 >
                   <item.icon className="inline-block w-5 h-5 mr-2" />
                   {item.text}
@@ -68,7 +70,7 @@ const NavBar = ({ isUserLoggedIn, onLogin, onLogout, user }) => {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-black text-white">
           <div className="px-4 py-4 space-y-4">
@@ -78,8 +80,8 @@ const NavBar = ({ isUserLoggedIn, onLogin, onLogout, user }) => {
                 to={item.to}
                 className="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300"
                 onClick={() => {
-                  item.onClick?.();
-                  setIsMenuOpen(false); // Close menu after clicking
+                  if (item.onClick) item.onClick(); // Call onClick if it exists
+                  setIsMenuOpen(false); // Close mobile menu after clicking
                 }}
               >
                 <item.icon className="inline-block w-5 h-5 mr-2" />
@@ -92,4 +94,19 @@ const NavBar = ({ isUserLoggedIn, onLogin, onLogout, user }) => {
     </nav>
   );
 };
+
+// PropTypes validation
+NavBar.propTypes = {
+  isUserLoggedIn: PropTypes.bool.isRequired,
+  onLogin: PropTypes.func,
+  onLogout: PropTypes.func.isRequired,
+  user: PropTypes.object,
+};
+
+// Default Props
+NavBar.defaultProps = {
+  onLogin: () => {}, // Prevent errors if not passed
+  user: null,
+};
+
 export default NavBar;

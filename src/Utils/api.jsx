@@ -2,7 +2,7 @@ import axios from "axios";
 
 const BASE_URL = "http://127.0.0.1:8000"; // Update with your backend base URL
 const AUTH_TOKEN_KEY = "auth_token";
-
+axios.defaults.withCredentials = true;
 // Create axios instance
 const api = axios.create({
   baseURL: `${BASE_URL}/api`,

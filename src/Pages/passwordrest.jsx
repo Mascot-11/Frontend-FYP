@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { resetPassword } from "../Utils/api"; // Import the resetPassword API function
 import { useSearchParams, Link, useNavigate } from "react-router-dom"; // For routing and navigation
 
