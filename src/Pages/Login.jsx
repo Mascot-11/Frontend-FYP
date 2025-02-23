@@ -16,7 +16,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const data = await login({ email, password });
-
+      console.log('API response data:', data);
       // Ensure we only store simple, safe data in localStorage (avoiding circular references)
       const userData = {
         id: data.user.id,
@@ -41,6 +41,7 @@ const Login = () => {
         navigate("/landing"); // Redirect to landing page for regular users
       }
     } catch (error) {
+      console.error("Error during login:", error);
       if (error.response && error.response.data) {
         toast.error(`${error.response.data.message}`);
       } else if (error.message) {
