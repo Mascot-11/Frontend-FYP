@@ -1,16 +1,44 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { motion } from "framer-motion";
-import Subnav from "../components/subnavbar";
+"use client"
 
-axios.defaults.baseURL = "http://127.0.0.1:8000/";
+import { useState, useEffect, useRef } from "react"
+import { useNavigate } from "react-router-dom"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import axios from "axios"
+import { gsap } from "gsap"
+import Subnav from "../components/subnavbar"
+
+axios.defaults.baseURL = "http://127.0.0.1:8000/"
+
+const fetchEvents = async () => {
+  const { data } = await axios.get("/api/events")
+  return data
+}
 
 const EventCrudPage = () => {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isAdding, setIsAdding] = useState(false);
+  const navigate = useNavigate()
+  const userRole = localStorage.getItem("user_role")
+  const authToken = localStorage.getItem("auth_token")
+  const queryClient = useQueryClient()
+  const pageRef = useRef(null)
+  const eventsRef = useRef([])
+
+  if (authToken) {
+    axios.defaults.headers.common["Authorization"] = `Bearer ${authToken}`
+  }
+
+  const {
+    data: events = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["events"],
+    queryFn: fetchEvents,
+  })
+
+  const filteredEvents =
+    userRole === "admin" ? events : events?.filter((event) => event.date >= new Date().toISOString().split("T")[0])
+
+  const [isAdding, setIsAdding] = useState(false)
   const [newEvent, setNewEvent] = useState({
     name: "",
     description: "",
@@ -18,114 +46,94 @@ const EventCrudPage = () => {
     price: "",
     available_tickets: "",
     image: null,
-  });
-  const navigate = useNavigate();
-  const userRole = localStorage.getItem("user_role");
-  const authToken = localStorage.getItem("auth_token");
+  })
 
-  useEffect(() => {
-    if (authToken) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${authToken}`;
-    }
-  }, [authToken]);
+  const addEventMutation = useMutation({
+    mutationFn: async (formData) => {
+      const { data } = await axios.post("/api/events", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["events"])
+      setIsAdding(false)
+    },
+  })
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get("/api/events");
-
-        if (Array.isArray(response.data)) {
-          // Filter events for non-admin users to show only upcoming events
-          const today = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
-          const filteredEvents =
-            userRole === "admin"
-              ? response.data
-              : response.data.filter((event) => event.date >= today);
-
-          setEvents(filteredEvents);
-        } else {
-          setError("Unexpected data format received");
-        }
-      } catch (error) {
-        setError("Failed to fetch events: " + error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
-  }, [userRole]);
+  const deleteEventMutation = useMutation({
+    mutationFn: async (eventId) => {
+      await axios.delete(`/api/events/${eventId}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["events"])
+    },
+  })
 
   const handleEditClick = (eventId) => {
-    if (userRole === "admin") {
-      navigate(`/events/${eventId}/edit`);
-    } else {
-      navigate(`/events/${eventId}`);
-    }
-  };
+    navigate(`/events/${eventId}/edit`)
+  }
 
-  const handleDeleteEvent = async (eventId) => {
-    if (!window.confirm("Are you sure you want to delete this event?")) return;
-
-    try {
-      await axios.delete(`/api/events/${eventId}`);
-      setEvents((prevEvents) =>
-        prevEvents.filter((event) => event.id !== eventId)
-      );
-    } catch (error) {
-      setError("Failed to delete event: " + error.message);
+  const handleDeleteEvent = (eventId) => {
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      deleteEventMutation.mutate(eventId)
     }
-  };
+  }
+
+  const handleGetTickets = (eventId) => {
+    navigate(`/ticket-purchase/${eventId}`)
+  }
 
   const handleAddEvent = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", newEvent.name);
-    formData.append("description", newEvent.description);
-    formData.append("date", newEvent.date);
-    formData.append("price", newEvent.price);
-    formData.append("available_tickets", newEvent.available_tickets);
-    formData.append("image", newEvent.image);
+    e.preventDefault()
+    const formData = new FormData()
+    Object.keys(newEvent).forEach((key) => {
+      formData.append(key, newEvent[key])
+    })
 
-    try {
-      const response = await axios.post("/api/events", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      setEvents((prevEvents) => [...prevEvents, response.data]);
-      setIsAdding(false);
-    } catch (error) {
-      setError("Failed to add event: " + error.message);
-    }
-  };
+    addEventMutation.mutate(formData)
+  }
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNewEvent((prevEvent) => ({
-      ...prevEvent,
-      [name]: value,
-    }));
-  };
+    setNewEvent((prevEvent) => ({ ...prevEvent, [e.target.name]: e.target.value }))
+  }
 
   const handleFileChange = (e) => {
-    setNewEvent((prevEvent) => ({
-      ...prevEvent,
-      image: e.target.files[0],
-    }));
-  };
+    setNewEvent((prevEvent) => ({ ...prevEvent, image: e.target.files[0] }))
+  }
 
-  if (loading) {
-    return <div className="text-center py-10 text-xl">Loading events...</div>;
+  useEffect(() => {
+    // Page entrance animation
+    gsap.from(pageRef.current, {
+      opacity: 0,
+      y: 50,
+      duration: 1,
+      ease: "power3.out",
+    })
+
+    // Events staggered animation
+    if (filteredEvents.length > 0) {
+      gsap.from(eventsRef.current, {
+        opacity: 0,
+        y: 50,
+        stagger: 0.1,
+        duration: 0.8,
+        ease: "power3.out",
+        delay: 0.5,
+      })
+    }
+  }, [filteredEvents])
+
+  if (isLoading) {
+    return <div className="text-center py-10 text-xl">Loading events...</div>
   }
 
   if (error) {
-    return <div className="text-center text-red-500 py-10">{error}</div>;
+    return <div className="text-center text-red-500 py-10">Error: {error.message}</div>
   }
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div ref={pageRef} className="min-h-screen bg-white text-black">
       <Subnav
         backButton={true}
         navItems={[
@@ -136,24 +144,22 @@ const EventCrudPage = () => {
         ]}
       />
       <header className="mb-8">
-        <h1 className="text-4xl font-extrabold text-center text-gray-800">
-          Events
-        </h1>
+        <h1 className="text-4xl font-extrabold text-center text-gray-800">Events</h1>
       </header>
 
       {userRole === "admin" && (
         <div className="mb-6 text-center">
-          <motion.button
+          <button
             onClick={() => setIsAdding(true)}
             className="bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition duration-300"
           >
             Add New Event
-          </motion.button>
+          </button>
         </div>
       )}
 
       {isAdding ? (
-        <motion.div className="bg-white p-6 shadow-xl rounded-lg mx-auto max-w-2xl">
+        <div className="bg-white p-6 shadow-xl rounded-lg mx-auto max-w-2xl">
           <h2 className="text-2xl font-semibold mb-4">Add Event</h2>
           <form onSubmit={handleAddEvent} encType="multipart/form-data">
             <div className="space-y-4">
@@ -215,68 +221,68 @@ const EventCrudPage = () => {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-                >
+                <button type="submit" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
                   Save Event
                 </button>
               </div>
             </div>
           </form>
-        </motion.div>
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {events.length === 0 ? (
-            <div className="text-center text-gray-500 col-span-full">
-              No upcoming events available
-            </div>
+          {filteredEvents.length === 0 ? (
+            <div className="text-center text-gray-500 col-span-full">No upcoming events available</div>
           ) : (
-            events.map((event) => (
-              <motion.div
+            filteredEvents.map((event, index) => (
+              <div
                 key={event.id}
+                ref={(el) => (eventsRef.current[index] = el)}
                 className="bg-white shadow-xl rounded-lg overflow-hidden"
               >
                 <img
-                  src={event.image_url || "https://via.placeholder.com/150"}
+                  src={event.image_url || "/placeholder.svg?height=224&width=400"}
                   alt={event.name}
                   className="w-full h-56 object-cover"
                 />
                 <div className="p-6">
-                  <h2 className="text-xl font-semibold text-gray-800">
-                    {event.name}
-                  </h2>
+                  <h2 className="text-xl font-semibold text-gray-800">{event.name}</h2>
                   <p className="text-gray-600 mt-2">{event.description}</p>
                   <div className="flex justify-between items-center mt-4">
-                    <span className="text-gray-500">
-                      {new Date(event.date).toLocaleDateString()}
-                    </span>
-                    <span className="font-semibold text-blue-600">
-                      ${event.price}
-                    </span>
+                    <span className="text-gray-500">{new Date(event.date).toLocaleDateString()}</span>
+                    <span className="font-semibold text-blue-600">${event.price}</span>
                   </div>
-                  <button
-                    onClick={() => handleEditClick(event.id)}
-                    className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 w-full mt-3"
-                  >
-                    {userRole === "admin" ? "Edit" : "View"}
-                  </button>
-                  {userRole === "admin" && (
+                  {userRole === "admin" ? (
+                    <>
+                      <button
+                        onClick={() => handleEditClick(event.id)}
+                        className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 w-full mt-3"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteEvent(event.id)}
+                        className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 w-full mt-2"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  ) : (
                     <button
-                      onClick={() => handleDeleteEvent(event.id)}
-                      className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 w-full mt-2"
+                      onClick={() => handleGetTickets(event.id)}
+                      className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 w-full mt-3"
                     >
-                      Delete
+                      Get Tickets
                     </button>
                   )}
                 </div>
-              </motion.div>
+              </div>
             ))
           )}
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default EventCrudPage;
+export default EventCrudPage
+

@@ -34,7 +34,7 @@ const Login = () => {
 
       // Redirect based on role using navigate
       if (userData.role === "admin") {
-        navigate("/landing"); // Redirect to landing page for admin
+        navigate("/admin/landing"); // Redirect to landing page for admin
       } else if (userData.role === "tattoo_artist") {
         navigate("/landing"); // Redirect to landing page for tattoo artist
       } else {

@@ -1,5 +1,4 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Home,
@@ -12,9 +11,22 @@ import {
   Menu,
 } from "lucide-react";
 
-const NavBar = ({ isUserLoggedIn, onLogin, onLogout }) => {
+const NavBar = ({ onLogin, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    if (token) {
+      setIsUserLoggedIn(true);
+    } else {
+      setIsUserLoggedIn(false);
+    }
+    // if any problem regarding infinte uncommet code below
+  },
+// []
+);
   const menuItems = [
     { to: "/landing", text: "Home", icon: Home },
     { to: "/tattoo", text: "Tattoo", icon: Palette },
@@ -93,20 +105,6 @@ const NavBar = ({ isUserLoggedIn, onLogin, onLogout }) => {
       )}
     </nav>
   );
-};
-
-// PropTypes validation
-NavBar.propTypes = {
-  isUserLoggedIn: PropTypes.bool.isRequired,
-  onLogin: PropTypes.func,
-  onLogout: PropTypes.func.isRequired,
-  user: PropTypes.object,
-};
-
-// Default Props
-NavBar.defaultProps = {
-  onLogin: () => {}, // Prevent errors if not passed
-  user: null,
-};
+}
 
 export default NavBar;

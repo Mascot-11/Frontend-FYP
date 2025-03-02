@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Calendar } from "lucide-react";
-import { useLocation, Link } from "react-router-dom"; // Import Link
+import { useLocation, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Subnav from "../components/subnavbar";
 import { toast, ToastContainer } from "react-toastify";
@@ -11,20 +12,60 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const fetchEvents = async () => {
+  const userToken = localStorage.getItem("auth_token");
+  const { data } = await axios.get("http://127.0.0.1:8000/api/events", {
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
+  return data;
+};
+
+// Khalti callback function
+const fetchKhaltiCallback = async (khaltiData) => {
+  const { data } = await axios.post("http://127.0.0.1:8000/api/khalti/callback", khaltiData);
+  return data;
+};
+
 const ColorModeEvents = () => {
   const [message, setMessage] = useState("Processing Khalti Payment...");
-  const [events, setEvents] = useState({ upcoming: [], past: [] });
   const location = useLocation();
-  const prevSearch = useRef(""); // Store previous location.search value
-  const upcomingRef = useRef(null); // Reference for upcoming events section
+  const prevSearch = useRef("");
+  const upcomingRef = useRef(null);
+  const [khaltiData, setKhaltiData] = useState(null);
+
+  // Fetch events using TanStack Query
+  const { data: allEvents, isLoading, isError } = useQuery({
+    queryKey: ["events"],
+    queryFn: fetchEvents,
+    staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
+  });
+  
+  const { data: khaltiResponse, isLoading: isKhaltiLoading, isError: isKhaltiError } = useQuery({
+    queryKey: ["khaltiPayment", khaltiData],
+    queryFn: () => fetchKhaltiCallback(khaltiData),
+    enabled: !!khaltiData, // Trigger only if khaltiData exists
+    onSuccess: (data) => {
+      setMessage(data.message);
+      if (data.message.includes("successfully")) {
+        toast.success("Payment Successful!");
+      } else {
+        toast.error("Transaction failed, Payment for event not confirmed");
+      }
+      window.history.replaceState({}, document.title, location.pathname);
+    },
+    onError: () => {
+      toast.error("Error processing payment");
+    },
+  });
 
   useEffect(() => {
     if (location.search !== prevSearch.current) {
       const params = new URLSearchParams(location.search);
-
       const userData = JSON.parse(localStorage.getItem("user_data"));
       const userId = localStorage.getItem("user_id");
-
+  
       const khaltiData = {
         pidx: params.get("pidx"),
         transaction_id: params.get("transaction_id"),
@@ -35,59 +76,22 @@ const ColorModeEvents = () => {
         status: params.get("status"),
         purchase_order_id: params.get("purchase_order_id"),
         purchase_order_name: params.get("purchase_order_name"),
-        user_data: userData, // Add user data array
-        user_id: userId, // Add user_id
+        user_data: userData,
+        user_id: userId,
       };
-
-      axios
-        .post("http://127.0.0.1:8000/api/khalti/callback", khaltiData)
-        .then((response) => {
-          setMessage(response.data.message);
-
-          if (response.data.message.includes("successfully")) {
-            toast.success("Payment Successful!");
-          } else {
-            toast.error("Transaction failed, Payment for event not confirmed");
-          }
-
-          window.history.replaceState({}, document.title, location.pathname);
-        })
-        .catch((error) => {
-          toast.error("Error processing payment");
-          console.error("Payment error:", error);
-        });
+  
+      // Set khaltiData state to trigger the query
+      setKhaltiData(khaltiData);
     }
-
+  
+    // Clear the query parameters from the URL after processing
+    if (location.search) {
+      window.history.replaceState({}, document.title, location.pathname);
+    }
+  
     prevSearch.current = location.search;
   }, [location.search]);
-
-  useEffect(() => {
-    const userToken = localStorage.getItem("auth_token");
-
-    axios
-      .get("http://127.0.0.1:8000/api/events", {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      })
-      .then((response) => {
-        const allEvents = response.data;
-
-        const today = new Date();
-        const upcoming = allEvents
-          .filter((event) => new Date(event.date) >= today)
-          .slice(0, 3);
-        const past = allEvents
-          .filter((event) => new Date(event.date) < today)
-          .slice(0, 3);
-
-        setEvents({ upcoming, past });
-      })
-      .catch((error) => {
-        console.error("Error fetching events:", error);
-        toast.error("Failed to load events.");
-      });
-  }, []);
+  
 
   useEffect(() => {
     if (upcomingRef.current) {
@@ -108,7 +112,18 @@ const ColorModeEvents = () => {
         }
       );
     }
-  }, [events.upcoming]);
+  }, [allEvents]);
+
+  if (isLoading) return <p>Loading events...</p>;
+  if (isError) return <p>Error fetching events.</p>;
+
+  const today = new Date();
+  const upcoming = allEvents
+    ? allEvents.filter((event) => new Date(event.date) >= today).slice(0, 3)
+    : [];
+  const past = allEvents
+    ? allEvents.filter((event) => new Date(event.date) < today).slice(0, 3)
+    : [];
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -138,11 +153,8 @@ const ColorModeEvents = () => {
             Upcoming Events
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {events.upcoming.map((event) => (
-              <Link
-                key={event.id}
-                to={`/events/${event.id}`} // Pass the event ID as part of the URL
-              >
+            {upcoming.map((event) => (
+              <Link key={event.id} to={`/events/${event.id}`}>
                 <motion.div
                   className="bg-white bg-opacity-10 rounded-lg overflow-hidden shadow-lg hover:scale-105 transform transition-all duration-300"
                   initial={{ opacity: 0, y: 50 }}
@@ -151,7 +163,7 @@ const ColorModeEvents = () => {
                 >
                   <div className="flex justify-center items-center">
                     <img
-                      src={event.image_url} // Dynamic image URL
+                      src={event.image_url}
                       alt={event.name}
                       className="w-full h-48 object-cover"
                     />
@@ -181,7 +193,7 @@ const ColorModeEvents = () => {
             Past Events
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {events.past.map((event) => (
+            {past.map((event) => (
               <motion.div
                 key={event.id}
                 className="bg-white bg-opacity-10 rounded-lg overflow-hidden shadow-lg hover:scale-105 transform transition-all duration-300"
@@ -191,7 +203,7 @@ const ColorModeEvents = () => {
               >
                 <div className="flex justify-center items-center">
                   <img
-                    src={event.image_url} // Dynamic image URL
+                    src={event.image_url}
                     alt={event.name}
                     className="w-full h-48 object-cover"
                   />

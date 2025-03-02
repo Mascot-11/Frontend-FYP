@@ -6,8 +6,9 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"; // Import QueryClient
+
 import NavBar from "./components/navbar";
-import AdminSidebar from "./components/Adminsidebar";
 import Landing from "./Pages/Landing";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
@@ -25,17 +26,19 @@ import FAQ from "./Pages/Faq";
 import { login } from "./Utils/api";
 import TattooGallery from "./Pages/TattooGallery";
 import AdminTattooGallery from "./Pages/AdminTattooGallery";
-// Import Event-related Pages
 import EventViewPage from "./Pages/EventViewPage";
 import EventCrudPage from "./Pages/EventCrudPage";
 import EventEditPage from "./Pages/EventEditPage";
-// Import Ticket Purchase Pages
 import TicketPurchase from "./Pages/TicketPurchase";
 import PaymentSuccess from "./components/PaymentSuccess";
 import TicketConfirmation from "./Pages/TicketConfirmation";
+import AdminLayout from "./components/AdminLayout";
+
+// Create a QueryClient instance
+const queryClient = new QueryClient();
 
 const App = () => {
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(true);
   const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
@@ -64,6 +67,8 @@ const App = () => {
 
   const handleLogout = () => {
     localStorage.clear();
+    setIsUserLoggedIn(false);
+    setUserRole("");
   };
 
   const routesWithoutNavBar = [
@@ -84,26 +89,15 @@ const App = () => {
     return (
       <>
         {showNavBar && (
-          <>
-            <NavBar
-              isUserLoggedIn={isUserLoggedIn}
-              onLogin={handleLogin}
-              onLogout={handleLogout}
-              userRole={userRole}
-            />
-            {userRole === "admin" && <AdminSidebar />}
-          </>
+          <NavBar onLogin={handleLogin} onLogout={handleLogout} />
         )}
         <div className={showNavBar ? "content-with-navbar" : "content"}>
           <Routes>
             <Route path="/" element={<Navigate to="/landing" />} />
-            <Route path="/landing" element={<Landing />} />
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
             <Route path="/register" element={<Register />} />
             <Route path="/music" element={<Music />} />
             <Route path="/tattoo" element={<Tattoo />} />
-            <Route path="/admin/users" element={<UserList />} />
-            <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/admin/appointments" element={<AppointmentsList />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
@@ -114,27 +108,19 @@ const App = () => {
             <Route path="/events" element={<EventCrudPage />} />
             <Route path="/events/:eventId/edit" element={<EventEditPage />} />
             <Route path="/events/:eventId" element={<EventViewPage />} />
-            {/* Corrected the route for ticket purchase */}
-            <Route
-              path="/ticket-purchase/:eventId"
-              element={<TicketPurchase />}
-            />
+            <Route path="/ticket-purchase/:eventId" element={<TicketPurchase />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route
-              path="/ticket-confirmation"
-              element={<TicketConfirmation />}
-            />
-            <Route
-              path="/myappointments"
-              element={
-                isUserLoggedIn ? <MyAppointments /> : <Navigate to="/login" />
-              }
-            />
+            <Route path="/ticket-confirmation" element={<TicketConfirmation />} />
+            <Route path="/myappointments" element={isUserLoggedIn ? <MyAppointments /> : <Navigate to="/login" />} />
+            <Route path="/landing" element={<Landing />} />
+            <Route path="/admin/tattoo-gallery" element={<AdminTattooGallery />} />
+            <Route element={<AdminLayout />}>
+            <Route path="/admin/landing" element={<Landing />} />
+              <Route path="/admin/dashboard" element={<Dashboard />} />
+              <Route path="/admin/users" element={<UserList />} />
+              <Route path="/events/:eventId/edit" element={<EventEditPage />} />
+            </Route>
             <Route path="*" element={<h2>Page not found</h2>} />
-            <Route
-              path="/admin/tattoo-gallery"
-              element={<AdminTattooGallery />}
-            />
           </Routes>
         </div>
       </>
@@ -142,9 +128,11 @@ const App = () => {
   };
 
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AppContent />
+      </Router>
+    </QueryClientProvider>
   );
 };
 
