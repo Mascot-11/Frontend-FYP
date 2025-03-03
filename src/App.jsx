@@ -6,7 +6,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"; // Import QueryClient
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import NavBar from "./components/navbar";
 import Landing from "./Pages/Landing";
@@ -37,20 +37,16 @@ import AdminLayout from "./components/AdminLayout";
 // Create a QueryClient instance
 const queryClient = new QueryClient();
 
+// Function to check if the user is logged in
+const isLoggedIn = () => !!localStorage.getItem("auth_token");
+
 const App = () => {
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(true);
-  const [userRole, setUserRole] = useState("");
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(isLoggedIn());
+  const [userRole, setUserRole] = useState(localStorage.getItem("user_role") || "");
 
   useEffect(() => {
-    const token = localStorage.getItem("auth_token");
-    const role = localStorage.getItem("user_role");
-    if (token && role) {
-      setIsUserLoggedIn(true);
-      setUserRole(role);
-    } else {
-      setIsUserLoggedIn(false);
-      setUserRole("");
-    }
+    setIsUserLoggedIn(isLoggedIn());
+    setUserRole(localStorage.getItem("user_role") || "");
   }, []);
 
   const handleLogin = async (credentials) => {
@@ -88,24 +84,21 @@ const App = () => {
 
     return (
       <>
-        {showNavBar && (
-          <NavBar onLogin={handleLogin} onLogout={handleLogout} />
-        )}
+        {showNavBar && <NavBar onLogin={handleLogin} onLogout={handleLogout} />}
         <div className={showNavBar ? "content-with-navbar" : "content"}>
           <Routes>
             <Route path="/" element={<Navigate to="/landing" />} />
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/music" element={<Music />} />
+            <Route path="/music" element={isUserLoggedIn ? <Music /> : <Navigate to="/login" />} />
             <Route path="/tattoo" element={<Tattoo />} />
             <Route path="/faq" element={<FAQ />} />
-            <Route path="/admin/appointments" element={<AppointmentsList />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/resetpassword" element={<ResetPassword />} />
-            <Route path="/appointment" element={<AppointmentPage />} />
-            <Route path="/chat" element={<Chat />} />
+            <Route path="/appointment" element={isUserLoggedIn ? <AppointmentPage /> : <Navigate to="/login" />} />
+            <Route path="/chat" element={isUserLoggedIn ? <Chat /> : <Navigate to="/login" />} />
             <Route path="/gallery" element={<TattooGallery />} />
-            <Route path="/events" element={<EventCrudPage />} />
+            <Route path="/events" element={isUserLoggedIn ? <EventCrudPage /> : <Navigate to="/login" />} />
             <Route path="/events/:eventId/edit" element={<EventEditPage />} />
             <Route path="/events/:eventId" element={<EventViewPage />} />
             <Route path="/ticket-purchase/:eventId" element={<TicketPurchase />} />
@@ -113,13 +106,18 @@ const App = () => {
             <Route path="/ticket-confirmation" element={<TicketConfirmation />} />
             <Route path="/myappointments" element={isUserLoggedIn ? <MyAppointments /> : <Navigate to="/login" />} />
             <Route path="/landing" element={<Landing />} />
-            <Route path="/admin/tattoo-gallery" element={<AdminTattooGallery />} />
+
+            {/* Admin Routes */}
             <Route element={<AdminLayout />}>
-            <Route path="/admin/landing" element={<Landing />} />
+              <Route path="/admin/landing" element={<Landing />} />
               <Route path="/admin/dashboard" element={<Dashboard />} />
               <Route path="/admin/users" element={<UserList />} />
               <Route path="/events/:eventId/edit" element={<EventEditPage />} />
+              <Route path="/admin/appointments" element={<AppointmentsList />} />
+              <Route path="/admin/tattoo-gallery" element={<AdminTattooGallery />} />
             </Route>
+
+            {/* 404 Route */}
             <Route path="*" element={<h2>Page not found</h2>} />
           </Routes>
         </div>
