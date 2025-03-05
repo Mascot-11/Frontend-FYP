@@ -161,21 +161,7 @@ const Dashboard = () => {
     fetchStats()
   }, [])
 
-  const chartColors = {
-    primary: "#8b5cf6",
-    secondary: "#ec4899",
-    tertiary: "#06b6d4",
-    quaternary: "#f59e0b",
-    accent1: "#22c55e",
-    accent2: "#ef4444",
-    background: "#111827",
-    cardBg: "#ffffff",
-    text: "#f3f4f6",
-    muted: "#9ca3af",
-  }
-
-  const pieColors = ["#8b5cf6", "#ec4899", "#06b6d4", "#f59e0b", "#22c55e"]
-
+  
   const pieData = [
     { name: "Confirmed", value: stats.appointmentStatus.confirmed },
     { name: "Pending", value: stats.appointmentStatus.pending },
@@ -285,7 +271,7 @@ const Dashboard = () => {
                             {format(new Date(event.date || event.event_date), "MMM dd, yyyy")}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${event.price || event.ticket_price || "Free"}
+                            NPR {event.price || event.ticket_price || "Free"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
