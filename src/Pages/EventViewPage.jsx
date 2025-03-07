@@ -110,7 +110,7 @@ const EventViewPage = () => {
         </div>
         <div className="flex items-center space-x-2 text-gray-600">
           <span className="font-semibold">Price:</span>
-          <span>${event.price}</span>
+          <span>NPR{event.price}</span>
         </div>
         <div className="flex items-center space-x-2 text-gray-600">
           <span className="font-semibold">Available Tickets:</span>

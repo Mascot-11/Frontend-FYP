@@ -1,23 +1,51 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { login } from "../Utils/api";
 import { Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Eye, EyeOff } from "lucide-react"; // Import icons for password visibility toggle
+import { Eye, EyeOff } from 'lucide-react';
+import { useAuth } from "../App"; // Import the auth context
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [passwordVisible, setPasswordVisible] = useState(false); // State to toggle password visibility
-  const navigate = useNavigate(); // Declare navigate hook
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the auth context to check if user is already logged in
+  const { isUserLoggedIn } = useAuth();
+  
+  // Get the page they were trying to visit before being redirected to login
+  const from = location.state?.from?.pathname || "/landing";
+  
+  // If user is already logged in, redirect them
+  useEffect(() => {
+    if (isUserLoggedIn) {
+      const userRole = localStorage.getItem("user_data") 
+        ? JSON.parse(localStorage.getItem("user_data")).role 
+        : "";
+        
+      if (userRole === "admin") {
+        navigate("/admin/landing");
+      } else {
+        navigate(from);
+      }
+    }
+  }, [isUserLoggedIn, navigate, from]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    
     try {
       const data = await login({ email, password });
       console.log('API response data:', data);
-      // Ensure we only store simple, safe data in localStorage (avoiding circular references)
+      
+      // Ensure we only store simple, safe data in localStorage
       const userData = {
         id: data.user.id,
         name: data.user.name,
@@ -27,19 +55,18 @@ const Login = () => {
       // Store the token and user data
       localStorage.setItem("auth_token", data.access_token);
       localStorage.setItem("user_id", userData.id);
-      localStorage.setItem("user_data", JSON.stringify(userData)); // Store user data safely
+      localStorage.setItem("user_data", JSON.stringify(userData));
+      localStorage.setItem("user_role", userData.role); // Add this for compatibility with App.jsx
 
       // Show a success message
       toast.success(`Welcome, ${userData.name}!`);
 
-      // Redirect based on role using navigate
-      if (userData.role === "admin") {
-        navigate("/admin/landing"); // Redirect to landing page for admin
-      } else if (userData.role === "tattoo_artist") {
-        navigate("/landing"); // Redirect to landing page for tattoo artist
-      } else {
-        navigate("/landing"); // Redirect to landing page for regular users
-      }
+      // Force a page reload to ensure all components recognize the auth state change
+      // This is a simple solution that ensures the App component re-checks localStorage
+      window.location.href = userData.role === "admin" 
+        ? "/admin/landing" 
+        : from;
+        
     } catch (error) {
       console.error("Error during login:", error);
       if (error.response && error.response.data) {
@@ -49,6 +76,7 @@ const Login = () => {
       } else {
         toast.error("An unexpected error occurred");
       }
+      setIsLoading(false);
     }
   };
 
@@ -76,7 +104,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="Enter your email address"
-                autoComplete="username" // Added autocomplete for email
+                autoComplete="username"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
               />
             </div>
@@ -89,19 +117,19 @@ const Login = () => {
               </label>
               <div className="relative">
                 <input
-                  type={passwordVisible ? "text" : "password"} // Toggle between text and password type
+                  type={passwordVisible ? "text" : "password"}
                   id="password"
                   name="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="Enter your password"
-                  autoComplete="current-password" // Added autocomplete for password
+                  autoComplete="current-password"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
                 />
                 <button
                   type="button"
-                  onClick={() => setPasswordVisible(!passwordVisible)} // Toggle password visibility
+                  onClick={() => setPasswordVisible(!passwordVisible)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
                 >
                   {passwordVisible ? (
@@ -129,9 +157,10 @@ const Login = () => {
             <div>
               <button
                 type="submit"
-                className="w-full bg-black text-white py-3 rounded-md text-lg font-semibold hover:bg-gray-800 transition duration-300 mt-6"
+                disabled={isLoading}
+                className="w-full bg-black text-white py-3 rounded-md text-lg font-semibold hover:bg-gray-800 transition duration-300 mt-6 disabled:opacity-70"
               >
-                Login
+                {isLoading ? "Logging in..." : "Login"}
               </button>
             </div>
           </form>

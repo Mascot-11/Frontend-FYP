@@ -44,7 +44,7 @@ const EventDetailPage = () => {
           <strong>Date:</strong> {event.date}
         </div>
         <div className="text-sm text-gray-600 mb-2">
-          <strong>Price:</strong> ${event.price}
+          <strong>Price:</strong> NPR{event.price}
         </div>
         <div className="text-sm text-gray-600 mb-4">
           <strong>Available Tickets:</strong> {event.available_tickets}
