@@ -30,6 +30,8 @@ import PaymentSuccess from "./components/PaymentSuccess"
 import TicketConfirmation from "./Pages/TicketConfirmation"
 import AdminLayout from "./components/AdminLayout"
 import ChatPopup from "./components/ChatPop"
+import UserPayments from "./Pages/User Payment"
+import AllPayments from "./Pages/AllPayments"
 
 // Create a QueryClient instance
 const queryClient = new QueryClient()
@@ -105,6 +107,7 @@ const App = () => {
     "/artists",
     "/music",
     "/appointment",
+    "/userpayments",
   ]
 
   // If still checking auth status, show loading
@@ -150,6 +153,14 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+<Route
+              path="/userpayments"
+              element={
+                <ProtectedRoute>
+                  <UserPayments />
+                </ProtectedRoute>
+              }
+            />
 
             <Route path="/landing" element={<Landing />} />
 
@@ -160,6 +171,8 @@ const App = () => {
               <Route path="/events/:eventId/edit" element={<EventEditPage />} />
               <Route path="/admin/appointments" element={<AppointmentsList />} />
               <Route path="/admin/tattoo-gallery" element={<AdminTattooGallery />} />
+              <Route path="/admin/payments" element={<AllPayments />} />
+              
             </Route>
             <Route path="*" element={<h2>Page not found</h2>} />
           </Routes>

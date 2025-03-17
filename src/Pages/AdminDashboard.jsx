@@ -19,7 +19,7 @@ import {
   Bar,
   Legend,
 } from "recharts"
-import { Users, Calendar, ImageIcon, MessageCircle, Brush } from "lucide-react"
+import { Users, Calendar, ImageIcon, MessageCircle, Brush, DollarSign } from "lucide-react"
 import { ClimbingBoxLoader } from "react-spinners"
 import { motion } from "framer-motion"
 
@@ -39,10 +39,23 @@ const Dashboard = () => {
     artistsPopularity: [],
     totalActiveEvents: 0,
     events: [],
+    totalPayments: 0,
+    payments: [],
   })
 
   const [loading, setLoading] = useState(true)
   const [setShowModal] = useState(false)
+
+  // Function to fetch payments data
+  const fetchPayments = async (headers) => {
+    try {
+      const response = await axios.get("http://127.0.0.1:8000/api/payments/all", { headers })
+      return response.data.payments || []
+    } catch (error) {
+      console.error("Error fetching payments:", error)
+      return []
+    }
+  }
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -70,6 +83,9 @@ const Dashboard = () => {
           headers,
         })
         const events = await axios.get("http://127.0.0.1:8000/api/events", { headers })
+
+        // Fetch payments data using the dedicated function
+        const payments = await fetchPayments(headers)
 
         const appointmentStatus = appointments.data.reduce(
           (acc, appointment) => {
@@ -134,6 +150,30 @@ const Dashboard = () => {
           return isAfter(eventDate, today) || format(eventDate, "yyyy-MM-dd") === format(today, "yyyy-MM-dd")
         })
 
+        // Calculate total payments - using total_amount field from the API response
+        let totalPayments = 0
+        if (Array.isArray(payments)) {
+          payments.forEach((payment) => {
+            // Use total_amount field as the primary source
+            let amount = 0
+            if (payment.total_amount !== undefined) {
+              amount = Number.parseFloat(payment.total_amount) || 0
+            } else if (payment.amount !== undefined) {
+              amount = Number.parseFloat(payment.amount) || 0
+            } else if (payment.price !== undefined && payment.quantity !== undefined) {
+              // If we have price and quantity but no total_amount
+              const price = Number.parseFloat(payment.price) || 0
+              const quantity = Number.parseFloat(payment.quantity) || 0
+              amount = price * quantity
+            }
+
+            // Only count completed payments
+            if (payment.status === "Completed") {
+              totalPayments += amount
+            }
+          })
+        }
+
         setStats({
           totalUsers: users.data.length,
           totalAppointments: appointments.data.length,
@@ -149,6 +189,8 @@ const Dashboard = () => {
           artistsPopularity: formattedArtistsPopularity,
           totalActiveEvents: activeEvents.length,
           events: activeEvents,
+          totalPayments: totalPayments,
+          payments: payments,
         })
 
         setLoading(false)
@@ -161,11 +203,52 @@ const Dashboard = () => {
     fetchStats()
   }, [])
 
-  
   const pieData = [
     { name: "Confirmed", value: stats.appointmentStatus.confirmed },
     { name: "Pending", value: stats.appointmentStatus.pending },
   ]
+
+  // Format the total payments with commas for thousands
+  const formattedTotalPayments = stats.totalPayments.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+
+  // Create payment data for chart - with improved error handling
+  const paymentsByEvent = stats.payments.reduce((acc, payment) => {
+    // Only include completed payments
+    if (payment.status !== "Completed") {
+      return acc
+    }
+
+    // Get event name with fallbacks
+    const eventName =
+      (payment.event && payment.event.name) || payment.event_name || `Event #${payment.event_id}` || "Unknown Event"
+
+    if (!acc[eventName]) {
+      acc[eventName] = 0
+    }
+
+    // Get amount with fallbacks - prioritize total_amount
+    let amount = 0
+    if (payment.total_amount !== undefined) {
+      amount = Number.parseFloat(payment.total_amount) || 0
+    } else if (payment.amount !== undefined) {
+      amount = Number.parseFloat(payment.amount) || 0
+    } else if (payment.price !== undefined && payment.quantity !== undefined) {
+      const price = Number.parseFloat(payment.price) || 0
+      const quantity = Number.parseFloat(payment.quantity) || 0
+      amount = price * quantity
+    }
+
+    acc[eventName] += amount
+    return acc
+  }, {})
+
+  const paymentChartData = Object.keys(paymentsByEvent).map((eventName) => ({
+    name: eventName,
+    amount: paymentsByEvent[eventName],
+  }))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -178,47 +261,44 @@ const Dashboard = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="container mx-auto px-4 py-8"
+          className="container mx-auto px-4 py-6"
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-8 border-b pb-4">Dashboard Overview</h1>
+         
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <StatsCard
-              title="Total Users"
-              value={stats.totalUsers}
-              icon={<Users className="w-8 h-8" />}
-              color="#000000"
-            />
+          {/* Stats Cards - Made smaller and more compact */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
+            <StatsCard title="Users" value={stats.totalUsers} icon={<Users className="w-5 h-5" />} color="#000000" />
             <StatsCard
               title="Appointments"
               value={stats.totalAppointments}
-              icon={<Calendar className="w-8 h-8" />}
+              icon={<Calendar className="w-5 h-5" />}
               color="#000000"
             />
             <StatsCard
               title="Gallery Items"
               value={stats.totalImages}
-              icon={<ImageIcon className="w-8 h-8" />}
+              icon={<ImageIcon className="w-5 h-5" />}
               color="#000000"
             />
             <StatsCard
               title="Active Chats"
               value={stats.ongoingChats}
-              icon={<MessageCircle className="w-8 h-8" />}
+              icon={<MessageCircle className="w-5 h-5" />}
               color="#000000"
             />
             <StatsCard
               title="Artists"
               value={stats.totalArtists}
-              icon={<Brush className="w-8 h-8" />}
+              icon={<Brush className="w-5 h-5" />}
               color="#000000"
               onClick={() => setShowModal(true)}
             />
             <StatsCard
-              title="Active Events"
-              value={stats.totalActiveEvents}
-              icon={<Calendar className="w-8 h-8" />}
+              title="Total Payments"
+              value={formattedTotalPayments}
+              icon={<DollarSign className="w-5 h-5" />}
               color="#000000"
+              isMonetary={true}
             />
           </div>
 
@@ -227,35 +307,35 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mb-8"
+              className="mb-6"
             >
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Upcoming Events</h2>
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <h2 className="text-lg font-semibold text-gray-900 mb-3">Upcoming Events</h2>
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
                           Event Name
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
                           Date
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
                           Price
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
                           Status
                         </th>
@@ -264,16 +344,16 @@ const Dashboard = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {stats.events.slice(0, 5).map((event, index) => (
                         <tr key={event.id || index} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
                             {event.name || event.title}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                             {format(new Date(event.date || event.event_date), "MMM dd, yyyy")}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                             NPR {event.price || event.ticket_price || "Free"}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-2 whitespace-nowrap">
                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                               Active
                             </span>
@@ -287,18 +367,18 @@ const Dashboard = () => {
             </motion.div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-xl shadow-sm p-6"
+              className="bg-white rounded-lg shadow-sm p-4 lg:col-span-1"
             >
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">User Growth</h2>
-              <ResponsiveContainer width="100%" height={300}>
+              <h2 className="text-base font-semibold text-gray-900 mb-4">User Growth</h2>
+              <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={stats.userRegistrations}>
-                  <XAxis dataKey="date" stroke="#6b7280" tick={{ fontSize: 12 }} />
-                  <YAxis stroke="#6b7280" tick={{ fontSize: 12 }} />
+                  <XAxis dataKey="date" stroke="#6b7280" tick={{ fontSize: 10 }} />
+                  <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "white",
@@ -322,10 +402,10 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-xl shadow-sm p-6"
+              className="bg-white rounded-lg shadow-sm p-4 lg:col-span-1"
             >
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Appointment Status</h2>
-              <ResponsiveContainer width="100%" height={300}>
+              <h2 className="text-base font-semibold text-gray-900 mb-4">Appointment Status</h2>
+              <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
                   <Pie
                     data={pieData}
@@ -333,8 +413,8 @@ const Dashboard = () => {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
-                    innerRadius={60}
+                    outerRadius={80}
+                    innerRadius={50}
                   >
                     {pieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={index === 0 ? "#000000" : "#9CA3AF"} />
@@ -357,13 +437,13 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white rounded-xl shadow-sm p-6"
+              className="bg-white rounded-lg shadow-sm p-4 lg:col-span-1"
             >
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Artist Performance</h2>
-              <ResponsiveContainer width="100%" height={300}>
+              <h2 className="text-base font-semibold text-gray-900 mb-4">Artist Performance</h2>
+              <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={stats.artistsPopularity}>
-                  <XAxis dataKey="artistName" stroke="#6b7280" tick={{ fontSize: 12 }} />
-                  <YAxis stroke="#6b7280" tick={{ fontSize: 12 }} />
+                  <XAxis dataKey="artistName" stroke="#6b7280" tick={{ fontSize: 10 }} />
+                  <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "white",
@@ -377,35 +457,133 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </motion.div>
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {paymentChartData.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="bg-white rounded-lg shadow-sm p-4"
+              >
+                <h2 className="text-base font-semibold text-gray-900 mb-4">Payments by Event</h2>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={paymentChartData}>
+                    <XAxis dataKey="name" stroke="#6b7280" tick={{ fontSize: 10 }} />
+                    <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                      }}
+                      formatter={(value) => [`NPR ${value.toFixed(2)}`, "Amount"]}
+                    />
+                    <Bar dataKey="amount" fill="#4B5563" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </motion.div>
+            )}
+
+            {/* Recent Payments - Compact version */}
+            {stats.payments.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+                <h2 className="text-base font-semibold text-gray-900 mb-3">Recent Payments</h2>
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ID
+                          </th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            User
+                          </th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Event
+                          </th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Amount
+                          </th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {stats.payments.slice(0, 5).map((payment, index) => (
+                          <tr key={payment.id || index} className="hover:bg-gray-50">
+                            <td className="px-3 py-2 whitespace-nowrap text-xs font-medium text-gray-900">
+                              {payment.transaction_id?.substring(0, 8) || "N/A"}...
+                            </td>
+                            <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                              {payment.user?.name || `User #${payment.user_id}`}
+                            </td>
+                            <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                              {payment.event?.name || `Event #${payment.event_id}`}
+                            </td>
+                            <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                              NPR{" "}
+                              {payment.total_amount ||
+                                (Number.parseFloat(payment.price) * Number.parseFloat(payment.quantity)).toFixed(2)}
+                            </td>
+                            <td className="px-3 py-2 whitespace-nowrap">
+                              <span
+                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                  payment.status === "Completed"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                }`}
+                              >
+                                {payment.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </div>
         </motion.div>
       )}
     </div>
   )
 }
 
-const StatsCard = ({ title, value, icon, color, onClick }) => {
+const StatsCard = ({ title, value, icon, color, onClick, isMonetary }) => {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className="bg-white rounded-xl shadow-sm p-8 cursor-pointer hover:shadow-md transition-shadow duration-300"
+      className="bg-white rounded-lg shadow-sm p-3 cursor-pointer hover:shadow-md transition-shadow duration-300"
       onClick={onClick}
     >
-      <div className="flex items-center justify-between mb-4">
-        <div className="p-4 rounded-xl" style={{ backgroundColor: `${color}10` }}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="p-2 rounded-lg" style={{ backgroundColor: `${color}10` }}>
           <div style={{ color }}>{icon}</div>
         </div>
-        <p className="text-4xl font-bold text-gray-800">{value}</p>
+        <p className="text-xl font-bold text-gray-800">{isMonetary ? `NPR ${value}` : value}</p>
       </div>
-      <p className="text-lg font-medium text-gray-500">{title}</p>
+      <p className="text-xs font-medium text-gray-500">{title}</p>
     </motion.div>
   )
 }
+
 StatsCard.propTypes = {
   title: PropTypes.string.isRequired,
-  value: PropTypes.number.isRequired,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
   icon: PropTypes.node.isRequired,
   color: PropTypes.string.isRequired,
   onClick: PropTypes.func,
+  isMonetary: PropTypes.bool,
+}
+
+StatsCard.defaultProps = {
+  isMonetary: false,
 }
 
 export default Dashboard

@@ -9,7 +9,9 @@ import {
   LogIn,
   X,
   Menu,
+  DollarSign
 } from "lucide-react";
+import {FaPaintBrush} from "react-icons/fa";
 
 const NavBar = ({ onLogin, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,7 +34,10 @@ const NavBar = ({ onLogin, onLogout }) => {
     { to: "/tattoo", text: "Tattoo", icon: Palette },
     { to: "/music", text: "Music", icon: Music },
     ...(isUserLoggedIn
-      ? [{ to: "/myappointments", text: "My Appointments", icon: Image }]
+      ? [{ to: "/userpayments", text: "My Payments", icon: DollarSign }]
+      : []),
+    ...(isUserLoggedIn
+      ? [{ to: "/myappointments", text: "My Appointments", icon: FaPaintBrush }]
       : []),
     ...(isUserLoggedIn
       ? [{ to: "/login", text: "Logout", icon: LogIn, onClick: onLogout }]

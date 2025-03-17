@@ -10,6 +10,8 @@ import {
   FaCog
   
 } from "react-icons/fa";
+import { path } from "framer-motion/client";
+import { DollarSign } from "lucide-react";
 
 const AdminSidebar = () => {
   const [] = useState(true);
@@ -25,10 +27,11 @@ const AdminSidebar = () => {
     { path: "/admin/dashboard", icon: FaTachometerAlt, label: "Dashboard" },
     { path: "/admin/tattoo-gallery", icon: FaImages, label: "Tattoo Gallery" },
     
-    { path: "/admin/artists", icon: FaPaintBrush, label: "Artists" },
+    //{ path: "/admin/artists", icon: FaPaintBrush, label: "Artists" },
     { path: "/admin/appointments", icon: FaCalendarAlt, label: "Appointments" },
     { path: "/admin/users", icon: FaUser, label: "Manage Users" },
     { path: "/chat", icon: FaCog, label: "Chats" },
+    {path: "/admin/payments", icon: DollarSign, label: "Payments"}
   ];
 
   return (

@@ -1,5 +1,5 @@
 
-
+import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence, useScroll, useSpring, useInView } from "framer-motion"
 import {
@@ -428,15 +428,7 @@ export default function AboutPage() {
         />
 
         {/* Logo placeholder with animation */}
-        <motion.div
-          className="absolute top-6 left-6 z-20"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-        >
-          <div className="text-white font-bold text-xl">logo here</div>
-        </motion.div>
-
+        
         <div className="relative z-10 text-center px-4 max-w-4xl">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -448,7 +440,7 @@ export default function AboutPage() {
               className="px-4 py-1 rounded-full bg-pink-500 bg-opacity-30 border border-pink-500 text-sm font-medium text-white mb-4 backdrop-blur-sm"
               animate={pulseAnimation}
             >
-              Tattoo Studio &  Music Ticketing
+              Color Mode 
             </motion.div>
           </motion.div>
 
@@ -462,14 +454,14 @@ export default function AboutPage() {
             <motion.span
               className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600"
               animate={{
-                backgroundPosition: ["0% 0%", "100% 100%"],
+                backgroundPosition: ["0% 0%", "100% 90%"],
               }}
               transition={{
                 duration: 5,
                 repeat: Number.POSITIVE_INFINITY,
                 repeatType: "reverse",
               }}
-              style={{ backgroundSize: "200% 200%" }}
+              style={{ backgroundSize: "200% 100%" }}
             >
               US
             </motion.span>
@@ -481,7 +473,7 @@ export default function AboutPage() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.8 }}
           >
-            Where tattoo artistry meets music event magic
+            Welcome to Color Mode, where creativity meets artistry. Discover a place that fuses tattoo artistry with unforgettable music events.
           </motion.p>
 
           <motion.div
@@ -495,7 +487,9 @@ export default function AboutPage() {
               whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(236, 72, 153, 0.4)" }}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="relative z-10">Explore Our Gallery</span>
+              <Link
+                  to="/gallery" className="relative z-10">Explore Our Gallery
+                   </Link>
               <motion.span
                 className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 z-0"
                 initial={{ x: "100%" }}
@@ -508,7 +502,9 @@ export default function AboutPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="relative z-10">Contact Us</span>
+             <Link
+                  to="/events" className="relative z-10">Explore Our Events
+                   </Link>
               <motion.span
                 className="absolute inset-0 bg-gray-700 z-0"
                 initial={{ y: "100%" }}
@@ -603,28 +599,7 @@ export default function AboutPage() {
           >
             What We Do
           </motion.div>
-          <motion.h2
-            className="text-4xl md:text-5xl font-bold mb-12"
-            variants={fadeIn}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            Main{" "}
-            <motion.span
-              className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600"
-              animate={{
-                backgroundPosition: ["0% 0%", "100% 100%"],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Number.POSITIVE_INFINITY,
-                repeatType: "reverse",
-              }}
-              style={{ backgroundSize: "200% 200%" }}
-            >
-              Topic Here
-            </motion.span>
-          </motion.h2>
-
+          
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
             variants={staggerContainer}
@@ -736,14 +711,14 @@ export default function AboutPage() {
               variants={fadeIn}
               transition={{ duration: 0.5 }}
             >
-              About Us
+              ESTD 2010
             </motion.div>
             <motion.h2
               className="text-4xl font-bold text-white leading-tight"
               variants={fadeInRight}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              Topic{" "}
+              Why{" "}
               <motion.span
                 className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600"
                 animate={{
@@ -756,7 +731,7 @@ export default function AboutPage() {
                 }}
                 style={{ backgroundSize: "200% 200%" }}
               >
-                Here
+                Us
               </motion.span>
             </motion.h2>
 
@@ -780,26 +755,7 @@ export default function AboutPage() {
             </motion.p>
 
             <motion.div variants={fadeInRight} transition={{ duration: 0.5, delay: 0.5 }}>
-              <motion.button
-                className="px-8 py-3 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 relative overflow-hidden"
-                whileHover={{ scale: 1.05, x: 5, boxShadow: "0 10px 25px -5px rgba(236, 72, 153, 0.4)" }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span className="relative z-10">Explore More</span>
-                <motion.span
-                  className="relative z-10"
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
-                >
-                  <ArrowRight className="w-5 h-5" />
-                </motion.span>
-                <motion.span
-                  className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 z-0"
-                  initial={{ x: "100%" }}
-                  whileHover={{ x: 0 }}
-                  transition={{ duration: 0.3 }}
-                />
-              </motion.button>
+             
             </motion.div>
           </div>
         </motion.div>
@@ -919,152 +875,7 @@ export default function AboutPage() {
           </motion.div>
         </motion.div>
 
-        {/* Team Section */}
-        <motion.div
-          ref={teamRef}
-          className="mb-24"
-          initial="hidden"
-          animate={isTeamInView ? "visible" : "hidden"}
-          variants={fadeIn}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="text-center mb-12">
-            <motion.div
-              className="inline-block px-4 py-1 rounded-full bg-gray-800 border border-gray-700 text-sm font-medium text-pink-500 mb-4"
-              variants={scaleIn}
-              transition={{ duration: 0.5 }}
-            >
-              Our Artists
-            </motion.div>
-            <motion.h2
-              className="text-4xl md:text-5xl font-bold"
-              variants={fadeIn}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              Meet Our{" "}
-              <motion.span
-                className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600"
-                animate={{
-                  backgroundPosition: ["0% 0%", "100% 100%"],
-                }}
-                transition={{
-                  duration: 5,
-                  repeat: Number.POSITIVE_INFINITY,
-                  repeatType: "reverse",
-                }}
-                style={{ backgroundSize: "200% 200%" }}
-              >
-                Team
-              </motion.span>
-            </motion.h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {teamMembers.map((member, index) => (
-              <motion.div
-                key={index}
-                className="bg-gray-800 rounded-2xl overflow-hidden shadow-2xl border border-gray-700 group"
-                variants={rotateIn}
-                custom={index}
-                transition={{ duration: 0.5, delay: 0.2 + index * 0.2 }}
-                whileHover={{ y: -15, transition: { duration: 0.3 } }}
-              >
-                <div className="relative overflow-hidden h-80">
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-70"
-                    whileHover={{ opacity: 0.4 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  <motion.img
-                    src={member.image || "/placeholder.svg"}
-                    alt={member.name}
-                    className="w-full h-full object-cover"
-                    whileHover={{ scale: 1.15 }}
-                    transition={{ duration: 0.7 }}
-                  />
-                  <motion.div
-                    className="absolute top-4 right-4 z-20"
-                    initial={{ opacity: 0, scale: 0 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
-                  >
-                    <div className="flex gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: 0.6 + i * 0.1 }}
-                        >
-                          <Star key={i} className="w-4 h-4 fill-pink-500 text-pink-500" />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-                </div>
-                <div className="p-8 relative">
-                  <motion.div
-                    className="absolute -top-12 left-8 bg-pink-500 text-white rounded-full p-3 shadow-lg"
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    {index === 0 ? (
-                      <Palette className="w-6 h-6" />
-                    ) : index === 1 ? (
-                      <Music className="w-6 h-6" />
-                    ) : (
-                      <Zap className="w-6 h-6" />
-                    )}
-                  </motion.div>
-                  <motion.h3
-                    className="text-2xl font-bold text-white mb-1"
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.3 }}
-                  >
-                    {member.name}
-                  </motion.h3>
-                  <motion.p
-                    className="text-pink-500 text-lg mb-4"
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.4 }}
-                  >
-                    {member.role}
-                  </motion.p>
-                  <motion.p
-                    className="text-gray-300"
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.5 }}
-                  >
-                    {member.bio}
-                  </motion.p>
-                  <motion.div
-                    className="mt-6 pt-6 border-t border-gray-700"
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.6 }}
-                  >
-                    <motion.button
-                      className="text-white flex items-center gap-2 group/btn"
-                      whileHover={{ x: 5 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <span>View Portfolio</span>
-                      <motion.span
-                        animate={{ x: [0, 5, 0] }}
-                        transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
-                      >
-                        <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                      </motion.span>
-                    </motion.button>
-                  </motion.div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+       
 
         {/* Services Section */}
         <motion.div
@@ -1530,7 +1341,7 @@ export default function AboutPage() {
                   variants={scaleIn}
                   transition={{ duration: 0.5, delay: 0.8 }}
                 >
-                  <span className="relative z-10">View Full Gallery</span>
+                  <Link to="/gallery"className="relative z-10">View Full Gallery</Link>
                   <motion.span
                     className="relative z-10"
                     animate={{ x: [0, 5, 0] }}
@@ -1835,7 +1646,7 @@ export default function AboutPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
                           >
-                            <div className="text-white font-medium">From $25</div>
+                            <div className="text-white font-medium">From NRS 250</div>
                             <motion.button
                               className="px-5 py-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-full text-sm font-medium"
                               whileHover={{ scale: 1.05 }}

@@ -30,7 +30,7 @@ const Subnav = ({ backButton = true, navItems = [] }) => {
             </button>
           )}
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold">
+            <Link to="/landing" className="text-2xl font-bold">
               Color Mode
             </Link>
           </div>

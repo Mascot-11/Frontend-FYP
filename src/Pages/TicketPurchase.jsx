@@ -191,7 +191,7 @@ const TicketPurchasePage = () => {
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <DollarSign className="w-5 h-5" />
-              <span>${event.price}</span>
+              <span>NRS {event.price}</span>
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
               <Ticket className="w-5 h-5" />
