@@ -1,9 +1,6 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import PropTypes from "prop-types"
 import { format, isAfter, startOfToday } from "date-fns"
-
 import axios from "axios"
 import {
   XAxis,
@@ -56,7 +53,6 @@ const Dashboard = () => {
       return []
     }
   }
-
   useEffect(() => {
     const fetchStats = async () => {
       const authToken = localStorage.getItem("auth_token")

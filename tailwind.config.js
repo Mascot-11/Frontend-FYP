@@ -3,6 +3,9 @@ export default {
   content: ["./src/**/*.{html,js,jsx}"],
   theme: {
     extend: {
+      colors: {
+        purpleCustom: '#5D2D8E',
+      },
       perspective: {
         1000: "1000px",
       },

@@ -150,7 +150,7 @@ const UserPayments = () => {
                       <div className="flex justify-between items-center">
                         <h3 className="font-bold text-lg text-gray-900">{events[payment.event_id]?.name || "Unknown Event"}</h3>
                         <span
-                          className={`px-2 py-1 text-xs font-semibold rounded-full text-white ${getPaymentMethodColor(payment.payment_method)}`}
+                          className={`px-2 py-1 text-xs bg-purple-600 shadow-sm font-semibold rounded-full text-white ${getPaymentMethodColor(payment.payment_method)}`}
                         >
                           {payment.payment_method}
                         </span>
@@ -179,7 +179,7 @@ const UserPayments = () => {
                               className="px-4 py-2 border border-gray-300 rounded-md flex items-center gap-2 hover:bg-gray-100 transition-colors"
                             >
                               <FaEye className="text-gray-900" />
-                              <span className="text-gray-900">View Event</span>
+                             
                             </button>
                           )}
                         </div>
