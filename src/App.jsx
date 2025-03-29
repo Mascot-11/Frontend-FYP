@@ -107,7 +107,7 @@ const App = () => {
     "/artists",
     "/music",
     "/appointment",
-    "/userpayments",
+  
   ]
 
   // If still checking auth status, show loading

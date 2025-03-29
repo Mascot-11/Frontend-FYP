@@ -45,7 +45,7 @@ export default function AboutPage() {
   const eventsRef = useRef(null)
   const ctaRef = useRef(null)
   const statsRef = useRef(null)
-
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
   // InView states for scroll animations
   const isHeroInView = useInView(heroRef, { once: false, amount: 0.2 })
   const isFeaturesInView = useInView(featuresRef, { once: true, amount: 0.2 })

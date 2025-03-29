@@ -12,7 +12,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [rememberMe, setRememberMe] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -37,6 +38,17 @@ const Login = () => {
     }
   }, [isUserLoggedIn, navigate, from]);
 
+  // Populate email and password from localStorage if "Remember Me" was checked
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem("remembered_email");
+    const rememberedPassword = localStorage.getItem("remembered_password");
+    if (rememberedEmail && rememberedPassword) {
+      setEmail(rememberedEmail);
+      setPassword(rememberedPassword);
+      setRememberMe(true);
+    }
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -57,6 +69,15 @@ const Login = () => {
       localStorage.setItem("user_id", userData.id);
       localStorage.setItem("user_data", JSON.stringify(userData));
       localStorage.setItem("user_role", userData.role); // Add this for compatibility with App.jsx
+
+      // Store email and password if "Remember Me" is checked
+      if (rememberMe) {
+        localStorage.setItem("remembered_email", email);
+        localStorage.setItem("remembered_password", password);
+      } else {
+        localStorage.removeItem("remembered_email");
+        localStorage.removeItem("remembered_password");
+      }
 
       // Show a success message
       toast.success(`Welcome, ${userData.name}!`);
@@ -145,6 +166,8 @@ const Login = () => {
                 id="rememberMe"
                 name="rememberMe"
                 type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
                 className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
               />
               <label

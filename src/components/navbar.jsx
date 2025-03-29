@@ -4,41 +4,47 @@ import {
   Home,
   Palette,
   Music,
-  Image,
   UserPlus,
   LogIn,
   X,
   Menu,
-  DollarSign
+  DollarSign,
 } from "lucide-react";
-import {FaPaintBrush} from "react-icons/fa";
+import { FaPaintBrush } from "react-icons/fa";
+import { RiAdminLine } from "react-icons/ri";
 
 const NavBar = ({ onLogin, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(true);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
-    if (token) {
+    const role = localStorage.getItem("user_role");
+    console.log(role);
+    
+    if (token && role) {
       setIsUserLoggedIn(true);
+      setUserRole(role);
     } else {
       setIsUserLoggedIn(false);
+      setUserRole("");
     }
-    // if any problem regarding infinte uncommet code below
-  },
-// []
-);
+  }, []);
+
   const menuItems = [
     { to: "/landing", text: "Home", icon: Home },
     { to: "/tattoo", text: "Tattoo", icon: Palette },
     { to: "/music", text: "Music", icon: Music },
-    ...(isUserLoggedIn
+    ...(isUserLoggedIn && userRole !== "admin"
       ? [{ to: "/userpayments", text: "My Payments", icon: DollarSign }]
       : []),
-    ...(isUserLoggedIn
+    ...(isUserLoggedIn && userRole !== "admin"
       ? [{ to: "/myappointments", text: "My Appointments", icon: FaPaintBrush }]
       : []),
+      ...(isUserLoggedIn && userRole === "admin"
+        ? [{ to: "/admin/dashboard", text: "Admin Dashboard", icon: RiAdminLine }]
+        : []),
     ...(isUserLoggedIn
       ? [{ to: "/login", text: "Logout", icon: LogIn, onClick: onLogout }]
       : [

@@ -91,13 +91,7 @@ const TattooStudio = () => {
     <div className="bg-gradient-to-b from-gray-900 to-black text-gray-100 min-h-screen relative">
       <Subnav backButton={true} navItems={navItems} />
       <main className="max-w-6xl mx-auto px-4 py-12 space-y-24">
-        <Link
-          to="/chat"
-          className="fixed bottom-8 right-8 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition-colors duration-300 flex items-center justify-center z-50"
-        >
-          <MessageCircle size={24} className="mr-2" />
-          <span className="font-semibold">Chat Now</span>
-        </Link>
+        
 
         <motion.section
           className="text-center"
