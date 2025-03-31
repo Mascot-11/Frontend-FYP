@@ -1,82 +1,157 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
+"use client"
+
+import { useState, useEffect } from "react"
+import axios from "axios"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  FaCalendarAlt,
+  FaMoneyBillWave,
+  FaCreditCard,
+  FaUser,
+  FaTicketAlt,
+  FaChevronLeft,
+  FaChevronRight,
+  FaInfoCircle,
+  FaClock,
+  FaMapMarkerAlt,
+} from "react-icons/fa"
 
 const AllPayments = () => {
-  const [payments, setPayments] = useState([]);
-  const [events, setEvents] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [sortOrder, setSortOrder] = useState("newest");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [payments, setPayments] = useState([])
+  const [events, setEvents] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [sortOrder, setSortOrder] = useState("newest")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedPayment, setSelectedPayment] = useState(null)
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [paymentsPerPage] = useState(6)
 
   useEffect(() => {
     const fetchPaymentsAndEvents = async () => {
       try {
-        const token = localStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token")
 
         // Fetch all payments
         const paymentsResponse = await axios.get("http://127.0.0.1:8000/api/payments/all", {
           headers: { Authorization: `Bearer ${token}` },
-        });
+        })
 
         // Add a small delay to make the loading animation visible
         setTimeout(() => {
-          setPayments(paymentsResponse.data.payments);
-        }, 500);
+          setPayments(paymentsResponse.data.payments)
+        }, 500)
 
         // Fetch all events
-        const eventsResponse = await axios.get("http://127.0.0.1:8000/api/events");
-        const eventMap = {};
+        const eventsResponse = await axios.get("http://127.0.0.1:8000/api/events")
+        const eventMap = {}
         eventsResponse.data.forEach((event) => {
-          eventMap[event.id] = event.name;
-        });
-        setEvents(eventMap);
+          eventMap[event.id] = {
+            name: event.name,
+            location: event.location,
+            date: event.date,
+            time: event.time,
+            price: event.price,
+            image_url: event.image_url,
+          }
+        })
+        setEvents(eventMap)
       } catch (error) {
-        console.error("Error fetching data:", error.response?.data || error.message);
+        console.error("Error fetching data:", error.response?.data || error.message)
       } finally {
         setTimeout(() => {
-          setLoading(false);
-        }, 800);
+          setLoading(false)
+        }, 800)
       }
-    };
+    }
 
-    fetchPaymentsAndEvents();
-  }, []);
+    fetchPaymentsAndEvents()
+  }, [])
 
   // Format date to be more readable
   const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
+    const options = { year: "numeric", month: "long", day: "numeric" }
+    return new Date(dateString).toLocaleDateString(undefined, options)
+  }
+
+  // Format time to be more readable
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A"
+
+    try {
+      // Handle different time formats
+      let time
+      if (timeString.includes("T")) {
+        // ISO format
+        time = new Date(timeString)
+      } else if (timeString.includes(":")) {
+        // HH:MM:SS format
+        const [hours, minutes] = timeString.split(":")
+        time = new Date()
+        time.setHours(hours, minutes)
+      } else {
+        return timeString // Return as is if format is unknown
+      }
+
+      return time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    } catch (e) {
+      console.error("Error formatting time:", e)
+      return timeString
+    }
+  }
 
   // Sort payments based on current sort order
   const getSortedPayments = () => {
-    if (!payments.length) return [];
+    if (!payments.length) return []
 
     const filtered = searchTerm
       ? payments.filter(
           (payment) =>
             (payment.user?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (events[payment.event_id] || "").toLowerCase().includes(searchTerm.toLowerCase())
+            (events[payment.event_id]?.name || "").toLowerCase().includes(searchTerm.toLowerCase()),
         )
-      : [...payments];
+      : [...payments]
 
     return filtered.sort((a, b) => {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
+      const dateA = new Date(a.created_at).getTime()
+      const dateB = new Date(b.created_at).getTime()
 
       if (sortOrder === "newest") {
-        return dateB - dateA;
+        return dateB - dateA
       } else if (sortOrder === "oldest") {
-        return dateA - dateB;
+        return dateA - dateB
       } else if (sortOrder === "highest") {
-        return b.total_amount - a.total_amount;
+        return b.total_amount - a.total_amount
       } else if (sortOrder === "lowest") {
-        return a.total_amount - b.total_amount;
+        return a.total_amount - b.total_amount
       }
-      return 0;
-    });
-  };
+      return 0
+    })
+  }
+
+  // Get current payments for pagination
+  const sortedPayments = getSortedPayments()
+  const indexOfLastPayment = currentPage * paymentsPerPage
+  const indexOfFirstPayment = indexOfLastPayment - paymentsPerPage
+  const currentPayments = sortedPayments.slice(indexOfFirstPayment, indexOfLastPayment)
+  const totalPages = Math.ceil(sortedPayments.length / paymentsPerPage)
+
+  // Change page
+  const paginate = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber)
+    }
+  }
+
+  // Handle payment details view
+  const handleViewDetails = (payment) => {
+    setSelectedPayment(payment)
+  }
+
+  const closeModal = () => {
+    setSelectedPayment(null)
+  }
 
   // Skeleton loading component
   const SkeletonCard = () => (
@@ -89,7 +164,7 @@ const AllPayments = () => {
         <div className="h-4 w-1/3 bg-gray-200 rounded animate-pulse"></div>
       </div>
     </div>
-  );
+  )
 
   return (
     <motion.div
@@ -105,7 +180,7 @@ const AllPayments = () => {
         className="mb-8 text-center"
       >
         <h1 className="text-3xl font-bold mb-2">All Payments</h1>
-        {!loading && <p className="text-lg text-gray-600">{getSortedPayments().length} payment records found</p>}
+        {!loading && <p className="text-lg text-gray-600">{sortedPayments.length} payment records found</p>}
       </motion.div>
 
       {!loading && (
@@ -148,8 +223,8 @@ const AllPayments = () => {
       ) : (
         <div className="space-y-4">
           <AnimatePresence>
-            {getSortedPayments().length > 0 ? (
-              getSortedPayments().map((payment, index) => (
+            {currentPayments.length > 0 ? (
+              currentPayments.map((payment, index) => (
                 <motion.div
                   key={payment.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -161,28 +236,49 @@ const AllPayments = () => {
                 >
                   <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-300 bg-white">
                     <div className="p-5">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <h3 className="font-bold text-lg mb-2">{events[payment.event_id] || "Unknown Event"}</h3>
-                          <p className="text-gray-700 mb-1">
-                            <span className="font-semibold">User:</span> {payment.user?.name || "Unknown User"}
-                          </p>
-                          <p className="text-gray-700 mb-1">
-                            <span className="font-semibold">Quantity:</span> {payment.quantity}
-                          </p>
+                          <h3 className="font-bold text-lg mb-2 truncate">
+                            {events[payment.event_id]?.name || "Unknown Event"}
+                          </h3>
+                          <div className="flex items-center text-gray-700 mb-1">
+                            <FaUser className="mr-2 text-gray-500" />
+                            <span className="truncate">{payment.user?.name || "Unknown User"}</span>
+                          </div>
+                          <div className="flex items-center text-gray-700 mb-1">
+                            <FaTicketAlt className="mr-2 text-gray-500" />
+                            <span>Quantity: {payment.quantity}</span>
+                          </div>
                         </div>
-                        <div className="flex flex-col justify-between">
-                          <div>
-                            <p className="text-gray-700 mb-1">
-                              <span className="font-semibold">Payment Method:</span> {payment.payment_method}
-                            </p>
-                            <p className="text-gray-700 mb-1">
-                              <span className="font-semibold">Date:</span> {formatDate(payment.created_at)}
-                            </p>
+                        <div>
+                          <div className="flex items-center text-gray-700 mb-1">
+                            <FaCreditCard className="mr-2 text-gray-500" />
+                            <span>{payment.payment_method}</span>
                           </div>
-                          <div className="mt-2">
-                            <p className="text-xl font-bold">Rs. {payment.total_amount}</p>
+                          <div className="flex items-center text-gray-700 mb-1">
+                            <FaCalendarAlt className="mr-2 text-gray-500" />
+                            <span>{formatDate(payment.created_at)}</span>
                           </div>
+                          {payment.transaction_id && (
+                            <div className="flex items-center text-gray-700 mb-1">
+                              <span className="text-xs text-gray-500">
+                                Transaction ID: {payment.transaction_id.substring(0, 10)}...
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col justify-between items-end">
+                          <div className="flex items-center text-xl font-bold text-gray-900">
+                            <FaMoneyBillWave className="mr-2 text-green-600" />
+                            <span>Rs. {payment.total_amount}</span>
+                          </div>
+                          <button
+                            onClick={() => handleViewDetails(payment)}
+                            className="mt-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md flex items-center transition-colors"
+                          >
+                            <FaInfoCircle className="mr-2" />
+                            View Details
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -214,10 +310,272 @@ const AllPayments = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className="flex justify-center items-center mt-8 space-x-2"
+            >
+              <button
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 rounded-md flex items-center ${
+                  currentPage === 1
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                <FaChevronLeft className="mr-1" size={12} />
+                Prev
+              </button>
+
+              <div className="flex space-x-1">
+                {[...Array(totalPages)].map((_, index) => {
+                  // Show limited page numbers with ellipsis
+                  if (
+                    index + 1 === 1 ||
+                    index + 1 === totalPages ||
+                    (index + 1 >= currentPage - 1 && index + 1 <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => paginate(index + 1)}
+                        className={`w-8 h-8 rounded-md ${
+                          currentPage === index + 1
+                            ? "bg-black text-white"
+                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                      >
+                        {index + 1}
+                      </button>
+                    )
+                  } else if (
+                    (index + 1 === currentPage - 2 && currentPage > 3) ||
+                    (index + 1 === currentPage + 2 && currentPage < totalPages - 2)
+                  ) {
+                    return <span key={index}>...</span>
+                  }
+                  return null
+                })}
+              </div>
+
+              <button
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1 rounded-md flex items-center ${
+                  currentPage === totalPages
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                Next
+                <FaChevronRight className="ml-1" size={12} />
+              </button>
+            </motion.div>
+          )}
         </div>
       )}
-    </motion.div>
-  );
-};
 
-export default AllPayments;
+      {/* Payment Details Modal */}
+      <AnimatePresence>
+        {selectedPayment && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
+            onClick={closeModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25 }}
+              className="bg-white rounded-lg shadow-xl overflow-hidden max-w-2xl w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative">
+                {events[selectedPayment.event_id]?.image_url ? (
+                  <img
+                    src={events[selectedPayment.event_id].image_url || "/placeholder.svg"}
+                    alt={events[selectedPayment.event_id]?.name || "Event"}
+                    className="w-full h-48 object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-500">No event image available</span>
+                  </div>
+                )}
+                <button
+                  onClick={closeModal}
+                  className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70 transition-colors"
+                >
+                  ✕
+                </button>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                  <h3 className="text-white font-bold text-xl">
+                    {events[selectedPayment.event_id]?.name || "Unknown Event"}
+                  </h3>
+                </div>
+              </div>
+
+              <div className="p-6">
+                {/* Payment Details Section */}
+                <div className="mb-6">
+                  <h4 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Payment Details</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <FaMoneyBillWave className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Amount</p>
+                          <p className="font-semibold">Rs. {selectedPayment.total_amount}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center">
+                        <FaCreditCard className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Payment Method</p>
+                          <p className="font-semibold">{selectedPayment.payment_method}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center">
+                        <FaTicketAlt className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Quantity</p>
+                          <p className="font-semibold">{selectedPayment.quantity} ticket(s)</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <FaCalendarAlt className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Payment Date</p>
+                          <p className="font-semibold">{formatDate(selectedPayment.created_at)}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center">
+                        <FaUser className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Customer</p>
+                          <p className="font-semibold">{selectedPayment.user?.name || "Unknown User"}</p>
+                        </div>
+                      </div>
+
+                      {selectedPayment.user?.email && (
+                        <div className="flex items-start">
+                          <FaUser className="mr-2 text-gray-700 w-5 h-5 mt-0.5" />
+                          <div>
+                            <p className="text-sm text-gray-500">Email</p>
+                            <p className="font-semibold break-all">{selectedPayment.user.email}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {selectedPayment.transaction_id && (
+                    <div className="mt-3">
+                      <p className="text-sm text-gray-500">Transaction ID</p>
+                      <p className="font-mono text-sm bg-gray-100 p-2 rounded">{selectedPayment.transaction_id}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Event Details Section */}
+                <div>
+                  <h4 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Event Details</h4>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {events[selectedPayment.event_id]?.date && (
+                      <div className="flex items-center">
+                        <FaCalendarAlt className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Event Date</p>
+                          <p className="font-semibold">{formatDate(events[selectedPayment.event_id].date)}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {events[selectedPayment.event_id]?.time && (
+                      <div className="flex items-center">
+                        <FaClock className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Event Time</p>
+                          <p className="font-semibold">{formatTime(events[selectedPayment.event_id].time)}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {events[selectedPayment.event_id]?.location && (
+                      <div className="flex items-center">
+                        <FaMapMarkerAlt className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Location</p>
+                          <p className="font-semibold">{events[selectedPayment.event_id].location}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {events[selectedPayment.event_id]?.price && (
+                      <div className="flex items-center">
+                        <FaMoneyBillWave className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Ticket Price</p>
+                          <p className="font-semibold">Rs. {events[selectedPayment.event_id].price}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 p-3 bg-gray-100 rounded-md">
+                    <p className="text-sm text-gray-500">Payment Summary</p>
+                    <div className="flex justify-between items-center mt-2">
+                      <span>Ticket Price × {selectedPayment.quantity}</span>
+                      <span>
+                        Rs.{" "}
+                        {events[selectedPayment.event_id]?.price
+                          ? events[selectedPayment.event_id].price * selectedPayment.quantity
+                          : selectedPayment.total_amount}
+                      </span>
+                    </div>
+                    {events[selectedPayment.event_id]?.price &&
+                      events[selectedPayment.event_id].price * selectedPayment.quantity !==
+                        selectedPayment.total_amount && (
+                        <>
+                          <div className="flex justify-between items-center mt-1">
+                            <span>Fees & Taxes</span>
+                            <span>
+                              Rs.{" "}
+                              {selectedPayment.total_amount -
+                                events[selectedPayment.event_id].price * selectedPayment.quantity}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-300 font-bold">
+                            <span>Total</span>
+                            <span>Rs. {selectedPayment.total_amount}</span>
+                          </div>
+                        </>
+                      )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
+export default AllPayments
+

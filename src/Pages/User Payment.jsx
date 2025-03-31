@@ -1,8 +1,19 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import axios from "axios"
 import { motion, AnimatePresence } from "framer-motion"
-import { FaEye, FaCalendarAlt, FaMoneyBillWave, FaCreditCard, FaClock } from "react-icons/fa"
+import {
+  FaEye,
+  FaCalendarAlt,
+  FaMoneyBillWave,
+  FaCreditCard,
+  FaClock,
+  FaTicketAlt,
+  FaUser,
+  FaMapMarkerAlt,
+} from "react-icons/fa"
 
 const UserPayments = () => {
   const { userId: paramUserId } = useParams()
@@ -14,7 +25,7 @@ const UserPayments = () => {
   const [events, setEvents] = useState({})
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedEventImage, setSelectedEventImage] = useState(null)
+  const [selectedPayment, setSelectedPayment] = useState(null)
   const [selectedEvent, setSelectedEvent] = useState(null)
 
   useEffect(() => {
@@ -47,6 +58,11 @@ const UserPayments = () => {
           eventMap[event.id] = {
             name: event.name,
             image_url: event.image_url,
+            description: event.description,
+            location: event.location,
+            date: event.date,
+            time: event.time,
+            organizer: event.organizer,
           }
         })
         setEvents(eventMap)
@@ -62,10 +78,10 @@ const UserPayments = () => {
     fetchPayments()
   }, [userId])
 
-  const handleOpenModal = (eventId) => {
+  const handleOpenModal = (payment, eventId) => {
     const event = events[eventId]
     if (event) {
-      setSelectedEventImage(event.image_url)
+      setSelectedPayment(payment)
       setSelectedEvent(event)
       setIsModalOpen(true)
     }
@@ -73,13 +89,40 @@ const UserPayments = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
-    setSelectedEventImage(null)
+    setSelectedPayment(null)
+    setSelectedEvent(null)
   }
 
   // Format date to be more readable
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" }
     return new Date(dateString).toLocaleDateString(undefined, options)
+  }
+
+  // Format time to be more readable
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A"
+
+    try {
+      // Handle different time formats
+      let time
+      if (timeString.includes("T")) {
+        // ISO format
+        time = new Date(timeString)
+      } else if (timeString.includes(":")) {
+        // HH:MM:SS format
+        const [hours, minutes] = timeString.split(":")
+        time = new Date()
+        time.setHours(hours, minutes)
+      } else {
+        return timeString // Return as is if format is unknown
+      }
+
+      return time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    } catch (e) {
+      console.error("Error formatting time:", e)
+      return timeString
+    }
   }
 
   // Get payment method badge color
@@ -148,7 +191,9 @@ const UserPayments = () => {
                   <div className="border rounded-lg overflow-hidden shadow-sm border-l-4 border-l-gray-900 hover:shadow-lg transition-shadow duration-300">
                     <div className="p-4 pb-2">
                       <div className="flex justify-between items-center">
-                        <h3 className="font-bold text-lg text-gray-900">{events[payment.event_id]?.name || "Unknown Event"}</h3>
+                        <h3 className="font-bold text-lg text-gray-900">
+                          {events[payment.event_id]?.name || "Unknown Event"}
+                        </h3>
                         <span
                           className={`px-2 py-1 text-xs bg-purple-600 shadow-sm font-semibold rounded-full text-white ${getPaymentMethodColor(payment.payment_method)}`}
                         >
@@ -173,13 +218,13 @@ const UserPayments = () => {
                           </div>
                         </div>
                         <div className="flex items-center justify-end">
-                          {events[payment.event_id]?.image_url && (
+                          {events[payment.event_id] && (
                             <button
-                              onClick={() => handleOpenModal(payment.event_id)}
+                              onClick={() => handleOpenModal(payment, payment.event_id)}
                               className="px-4 py-2 border border-gray-300 rounded-md flex items-center gap-2 hover:bg-gray-100 transition-colors"
                             >
                               <FaEye className="text-gray-900" />
-                             
+                              <span>View Details</span>
                             </button>
                           )}
                         </div>
@@ -206,9 +251,9 @@ const UserPayments = () => {
         </div>
       )}
 
-      {/* Modal for viewing event image */}
+      {/* Enhanced Modal for viewing payment and event details */}
       <AnimatePresence>
-        {isModalOpen && (
+        {isModalOpen && selectedPayment && selectedEvent && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -221,25 +266,124 @@ const UserPayments = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: "spring", damping: 25 }}
-              className="bg-white rounded-lg shadow-xl overflow-hidden max-w-lg w-full"
+              className="bg-white rounded-lg shadow-xl overflow-hidden max-w-2xl w-full"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="relative">
-                <img src={selectedEventImage || "/placeholder.svg"} alt="Event" className="w-full h-64 object-cover" />
+                <img
+                  src={selectedEvent.image_url || "/placeholder.svg"}
+                  alt={selectedEvent.name}
+                  className="w-full h-64 object-cover"
+                />
                 <button
                   onClick={handleCloseModal}
                   className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-70 transition-colors"
                 >
                   ✕
                 </button>
-                {selectedEvent && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                    <h3 className="text-white font-bold text-lg">{selectedEvent.name}</h3>
-                  </div>
-                )}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                  <h3 className="text-white font-bold text-xl">{selectedEvent.name}</h3>
+                </div>
               </div>
-              <div className="p-4">
-                <p className="text-gray-600">Click outside to close</p>
+
+              <div className="p-6">
+                {/* Payment Details Section */}
+                <div className="mb-6">
+                  <h4 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Payment Details</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <FaMoneyBillWave className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Amount</p>
+                          <p className="font-semibold">Rs. {selectedPayment.total_amount}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center">
+                        <FaCreditCard className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Payment Method</p>
+                          <p className="font-semibold">{selectedPayment.payment_method}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <FaCalendarAlt className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Payment Date</p>
+                          <p className="font-semibold">{formatDate(selectedPayment.created_at)}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center">
+                        <FaTicketAlt className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Quantity</p>
+                          <p className="font-semibold">{selectedPayment.quantity} ticket(s)</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {selectedPayment.transaction_id && (
+                    <div className="mt-3">
+                      <p className="text-sm text-gray-500">Transaction ID</p>
+                      <p className="font-mono text-sm bg-gray-100 p-2 rounded">{selectedPayment.transaction_id}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Event Details Section */}
+                <div>
+                  <h4 className="text-lg font-bold text-gray-900 mb-3 border-b pb-2">Event Details</h4>
+
+                  {selectedEvent.description && <p className="text-gray-700 mb-4">{selectedEvent.description}</p>}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedEvent.date && (
+                      <div className="flex items-center">
+                        <FaCalendarAlt className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Event Date</p>
+                          <p className="font-semibold">{formatDate(selectedEvent.date)}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedEvent.time && (
+                      <div className="flex items-center">
+                        <FaClock className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Event Time</p>
+                          <p className="font-semibold">{formatTime(selectedEvent.time)}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedEvent.location && (
+                      <div className="flex items-center">
+                        <FaMapMarkerAlt className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Location</p>
+                          <p className="font-semibold">{selectedEvent.location}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedEvent.organizer && (
+                      <div className="flex items-center">
+                        <FaUser className="mr-2 text-gray-700 w-5 h-5" />
+                        <div>
+                          <p className="text-sm text-gray-500">Organizer</p>
+                          <p className="font-semibold">{selectedEvent.organizer}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -250,3 +394,4 @@ const UserPayments = () => {
 }
 
 export default UserPayments
+

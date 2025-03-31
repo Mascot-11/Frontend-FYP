@@ -1,82 +1,107 @@
-import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
-import { FaCheckCircle, FaClock } from "react-icons/fa";
-import { ClimbingBoxLoader } from "react-spinners";
-import { Eye } from "lucide-react"; // Import Eye icon from Lucide React
+
+
+import { useState, useEffect, useCallback } from "react"
+import axios from "axios"
+import { FaCheckCircle, FaClock, FaChevronLeft, FaChevronRight } from "react-icons/fa"
+import { ClimbingBoxLoader } from "react-spinners"
+import { Eye } from "lucide-react"
 
 const MyAppointments = () => {
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imageLoading, setImageLoading] = useState(false); // For tracking image loading state
-  const [hasError, setHasError] = useState(false);
+  const [appointments, setAppointments] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [selectedAppointment, setSelectedAppointment] = useState(null)
+  const [imageLoading, setImageLoading] = useState(false)
+  const [hasError, setHasError] = useState(false)
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [appointmentsPerPage] = useState(5)
 
   // Fetch appointments from the backend
   const fetchAppointments = useCallback(async () => {
     try {
-      const token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token")
 
       if (!token) {
-        setError("No authentication token found.");
-        setLoading(false);
-        return;
+        setError("No authentication token found.")
+        setLoading(false)
+        return
       }
 
-      const response = await axios.get(
-        "http://127.0.0.1:8000/api/user/appointments",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.get("http://127.0.0.1:8000/api/user/appointments", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
 
-      console.log(response.data); // Log data to inspect
-      setAppointments(Array.isArray(response.data) ? response.data : []);
-      setLoading(false);
+      console.log(response.data) // Log data to inspect
+      setAppointments(Array.isArray(response.data) ? response.data : [])
+      setLoading(false)
     } catch (err) {
-      console.error(err); // Log the error for debugging
-      setError("An error occurred while fetching appointments.");
-      setLoading(false);
+      console.error(err) // Log the error for debugging
+      setError("An error occurred while fetching appointments.")
+      setLoading(false)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    fetchAppointments();
-  }, [fetchAppointments]);
+    fetchAppointments()
+  }, [fetchAppointments])
 
-  // Function to format the date and time
+  // Function to format the date (YYYY-MM-DD)
   const formatDate = (datetime) => {
-    const date = new Date(datetime);
+    const date = new Date(datetime)
     if (isNaN(date)) {
-      return "Invalid date";
+      return "Invalid date"
     }
-    const day = date.getDate();
-    const month = date.getMonth() + 1; // Months are zero-indexed
-    const year = date.getFullYear();
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const hour = hours % 12 || 12; // Convert 24hr format to 12hr format
-    const formattedTime = `${hour}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } ${ampm}`;
-    return `${day}-${month}-${year} ${formattedTime}`;
-  };
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0") // Months are zero-indexed
+    const day = String(date.getDate()).padStart(2, "0")
 
-  const handleImageClick = (imageUrl) => {
-    setSelectedImage(imageUrl);
-    setImageLoading(true); // Start loading the image when clicked
-  };
+    return `${year}-${month}-${day}`
+  }
+
+  // Function to format the time (1AM, 2PM format)
+  const formatTime = (datetime) => {
+    const date = new Date(datetime)
+    if (isNaN(date)) {
+      return "Invalid time"
+    }
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+    const ampm = hours >= 12 ? "PM" : "AM"
+    const hour = hours % 12 || 12 // Convert 24hr format to 12hr format
+
+    return `${hour}${minutes > 0 ? `:${minutes.toString().padStart(2, "0")}` : ""} ${ampm}`
+  }
+
+  const handleAppointmentClick = (appointment) => {
+    setSelectedAppointment(appointment)
+    if (appointment.image_url) {
+      setImageLoading(true)
+    }
+  }
 
   const closeModal = () => {
-    setSelectedImage(null);
-  };
+    setSelectedAppointment(null)
+  }
 
   const handleImageLoad = () => {
-    setImageLoading(false); // Stop loading once the image is loaded
-  };
+    setImageLoading(false)
+  }
+
+  // Pagination logic
+  const indexOfLastAppointment = currentPage * appointmentsPerPage
+  const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage
+  const currentAppointments = appointments.slice(indexOfFirstAppointment, indexOfLastAppointment)
+  const totalPages = Math.ceil(appointments.length / appointmentsPerPage)
+
+  const paginate = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber)
+    }
+  }
 
   // Error Boundary functionality
   if (hasError) {
@@ -84,7 +109,7 @@ const MyAppointments = () => {
       <div className="error-container text-center text-red-600 mt-10">
         <h2>Something went wrong. Please try again later.</h2>
       </div>
-    );
+    )
   }
 
   try {
@@ -93,136 +118,208 @@ const MyAppointments = () => {
         <div className="flex justify-center items-center h-screen">
           <ClimbingBoxLoader color="#4A90E2" size={15} loading={loading} />
         </div>
-      );
+      )
     }
 
     if (error) {
-      return <div className="text-center text-red-600 mt-10">{error}</div>;
+      return <div className="text-center text-red-600 mt-10">{error}</div>
     }
 
     if (appointments.length === 0) {
-      return (
-        <div className="text-center text-gray-600 mt-10">
-          No appointments found for this user.
-        </div>
-      );
+      return <div className="text-center text-gray-600 mt-10">No appointments found for this user.</div>
     }
 
     return (
       <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          Your Appointments
-        </h2>
-        <table className="min-w-full table-auto border-collapse">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="py-3 px-4 text-left text-gray-700 font-bold">
-                Artist Name
-              </th>
-              <th className="py-3 px-4 text-left text-gray-700 font-bold">
-                Date
-              </th>
-              <th className="py-3 px-4 text-left text-gray-700 font-bold">
-                Description
-              </th>
-              <th className="py-3 px-4 text-left text-gray-700 font-bold">
-                Status
-              </th>
-              <th className="py-3 px-4 text-left text-gray-700 font-bold">
-                View Image
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {appointments.map((appointment) => {
-              const isPending = appointment.status === "pending";
-              const imageUrl = appointment.image_url || ""; // Get image_url from backend
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Your Appointments</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto border-collapse">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="py-3 px-4 text-left text-gray-700 font-bold">Artist Name</th>
+                <th className="py-3 px-4 text-left text-gray-700 font-bold">Date</th>
+                <th className="py-3 px-4 text-left text-gray-700 font-bold">Time</th>
+                <th className="py-3 px-4 text-left text-gray-700 font-bold">Status</th>
+                <th className="py-3 px-4 text-left text-gray-700 font-bold">Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentAppointments.map((appointment) => {
+                const isPending = appointment.status === "pending"
 
-              return (
-                <tr
-                  key={appointment.id}
-                  className="appointment-row border-t hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <td className="py-3 px-4 font-semibold text-gray-800">
-                    {appointment.artist_name}
-                  </td>
-                  <td className="py-3 px-4 font-semibold text-gray-800">
-                    {formatDate(appointment.appointment_datetime)}
-                  </td>
-                  <td className="py-3 px-4 font-semibold text-gray-800">
-                    {appointment.description || "No description provided"}
-                  </td>
-                  <td className="py-3 px-4 font-semibold">
-                    <span
-                      className={`flex items-center ${
-                        isPending ? "opacity-50" : ""
-                      } ${
-                        appointment.status === "confirmed"
-                          ? "text-green-500"
-                          : "text-yellow-500"
+                return (
+                  <tr
+                    key={appointment.id}
+                    className="appointment-row border-t hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <td className="py-3 px-4 font-semibold text-gray-800">{appointment.artist_name}</td>
+                    <td className="py-3 px-4 font-semibold text-gray-800">
+                      {formatDate(appointment.appointment_datetime)}
+                    </td>
+                    <td className="py-3 px-4 font-semibold text-gray-800">
+                      {formatTime(appointment.appointment_datetime)}
+                    </td>
+                    <td className="py-3 px-4 font-semibold">
+                      <span
+                        className={`flex items-center ${isPending ? "opacity-50" : ""} ${
+                          appointment.status === "confirmed" ? "text-green-500" : "text-yellow-500"
+                        }`}
+                      >
+                        {appointment.status === "confirmed" ? (
+                          <FaCheckCircle className="mr-2" />
+                        ) : (
+                          <FaClock className="mr-2" />
+                        )}
+                        {appointment.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <button
+                        onClick={() => handleAppointmentClick(appointment)}
+                        className="text-blue-500 hover:text-blue-700 transition-colors"
+                      >
+                        <Eye className="w-6 h-6" />
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center mt-6 space-x-2">
+            <button
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md flex items-center ${
+                currentPage === 1
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              <FaChevronLeft className="mr-1" size={12} />
+              Prev
+            </button>
+
+            <div className="flex space-x-1">
+              {[...Array(totalPages)].map((_, index) => {
+                // Show limited page numbers with ellipsis
+                if (
+                  index + 1 === 1 ||
+                  index + 1 === totalPages ||
+                  (index + 1 >= currentPage - 1 && index + 1 <= currentPage + 1)
+                ) {
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => paginate(index + 1)}
+                      className={`w-8 h-8 rounded-md ${
+                        currentPage === index + 1
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                       }`}
                     >
-                      {appointment.status === "confirmed" ? (
-                        <FaCheckCircle className="mr-2" />
-                      ) : (
-                        <FaClock className="mr-2" />
-                      )}
-                      {appointment.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    {imageUrl && (
-                      <button
-                        onClick={() => handleImageClick(imageUrl)}
-                        className="text-blue-500"
-                      >
-                        <Eye className="w-6 h-6" /> {/* Lucide Eye icon */}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                      {index + 1}
+                    </button>
+                  )
+                } else if (
+                  (index + 1 === currentPage - 2 && currentPage > 3) ||
+                  (index + 1 === currentPage + 2 && currentPage < totalPages - 2)
+                ) {
+                  return <span key={index}>...</span>
+                }
+                return null
+              })}
+            </div>
 
-        {/* Image Modal */}
-        {selectedImage && (
+            <button
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md flex items-center ${
+                currentPage === totalPages
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              Next
+              <FaChevronRight className="ml-1" size={12} />
+            </button>
+          </div>
+        )}
+
+        {/* Enhanced Modal with Appointment Details */}
+        {selectedAppointment && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 transition-opacity duration-300 ease-in-out">
-            <div className="relative bg-white p-6 rounded-lg shadow-lg w-full sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 max-w-xl overflow-hidden">
-              <button
-                onClick={closeModal}
-                className="absolute top-4 right-4 text-red-600 font-bold text-2xl"
-              >
+            <div className="relative bg-white p-6 rounded-lg shadow-lg w-full sm:w-3/4 md:w-2/3 lg:w-1/2 max-w-2xl overflow-hidden">
+              <button onClick={closeModal} className="absolute top-4 right-4 text-red-600 font-bold text-2xl">
                 ✖
               </button>
-              <div className="flex justify-center items-center">
-                {imageLoading && (
-                  <div className="absolute z-10">
-                    <ClimbingBoxLoader
-                      color="#4A90E2"
-                      size={15}
-                      loading={true}
+
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Appointment Details</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <p className="text-sm text-gray-500">Artist</p>
+                  <p className="font-semibold text-gray-800">{selectedAppointment.artist_name}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Status</p>
+                  <p
+                    className={`font-semibold ${
+                      selectedAppointment.status === "confirmed" ? "text-green-500" : "text-yellow-500"
+                    }`}
+                  >
+                    {selectedAppointment.status}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Date</p>
+                  <p className="font-semibold text-gray-800">{formatDate(selectedAppointment.appointment_datetime)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Time</p>
+                  <p className="font-semibold text-gray-800">{formatTime(selectedAppointment.appointment_datetime)}</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-sm text-gray-500">Description</p>
+                <p className="text-gray-800">{selectedAppointment.description || "No description provided"}</p>
+              </div>
+
+              {selectedAppointment.image_url && (
+                <div className="mt-4">
+                  <p className="text-sm text-gray-500 mb-2">Reference Image</p>
+                  <div className="flex justify-center items-center bg-gray-100 rounded-lg p-2">
+                    {imageLoading && (
+                      <div className="absolute z-10">
+                        <ClimbingBoxLoader color="#4A90E2" size={15} loading={true} />
+                      </div>
+                    )}
+                    <img
+                      src={selectedAppointment.image_url || "/placeholder.svg"}
+                      alt="Appointment Reference"
+                      className="w-full h-auto max-h-[300px] object-contain rounded-lg"
+                      loading="lazy"
+                      onLoad={handleImageLoad}
                     />
                   </div>
-                )}
-                <img
-                  src={selectedImage}
-                  alt="Appointment"
-                  className="w-full h-auto max-h-[70vh] object-contain rounded-lg"
-                  loading="lazy" // Lazy load the image
-                  onLoad={handleImageLoad} // Trigger the image loading state change
-                />
-              </div>
+                </div>
+              )}
             </div>
           </div>
         )}
       </div>
-    );
+    )
   } catch (error) {
-    setHasError(true); // If error occurs in rendering, set error state
-    console.error("Error during rendering:", error);
+    setHasError(true)
+    console.error("Error during rendering:", error)
+    return null
   }
-};
+}
 
-export default MyAppointments;
+export default MyAppointments
+
