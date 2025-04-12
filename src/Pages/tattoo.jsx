@@ -6,12 +6,12 @@ import {
   Droplet,
   Sun,
   Heart,
-  MessageCircle,
+ 
 } from "lucide-react";
 import Subnav from "../components/subnavbar";
 import { Link } from "react-router-dom";
 
-const BASE_URL = "http://127.0.0.1:8000/api";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const TattooStudio = () => {
   const [images, setImages] = useState([]);

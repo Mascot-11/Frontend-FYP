@@ -6,7 +6,7 @@ import axios from "axios"
 import { motion } from "framer-motion"
 import { Calendar, DollarSign, Ticket, Minus, Plus } from "lucide-react"
 
-axios.defaults.baseURL = "http://127.0.0.1:8000/"
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const TicketPurchasePage = () => {
   const { eventId } = useParams()
@@ -19,7 +19,7 @@ const TicketPurchasePage = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await axios.get(`/api/events/${eventId}`, {
+        const response = await axios.get(`/events/${eventId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
@@ -40,7 +40,7 @@ const TicketPurchasePage = () => {
       const userData = JSON.parse(localStorage.getItem("user_data")) || {}
 
       const response = await axios.post(
-        "/api/tickets/purchase",
+        "/tickets/purchase",
         {
           event_id: eventId,
           event_name: event.name,
@@ -72,7 +72,7 @@ const TicketPurchasePage = () => {
   const handlePaymentSuccess = useCallback(
     async (paymentData) => {
       try {
-        const response = await axios.post("/api/tickets/verify-khalti-payment", paymentData, {
+        const response = await axios.post("/tickets/verify-khalti-payment", paymentData, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },

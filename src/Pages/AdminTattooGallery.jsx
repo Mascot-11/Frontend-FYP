@@ -13,7 +13,7 @@ import { Paperclip } from "lucide-react"
 gsap.registerPlugin(ScrollTrigger)
 
 const AdminTattooGallery = () => {
-  const BASE_URL = "http://127.0.0.1:8000/api"
+  const BASE_URL = import.meta.env.VITE_API_URL;
   const [images, setImages] = useState([])
   const [newImage, setNewImage] = useState(null)
   const [description, setDescription] = useState("")
@@ -21,7 +21,7 @@ const AdminTattooGallery = () => {
   const containerRef = useRef(null)
   const fileInputRef = useRef(null)
   const navigate = useNavigate()
-
+  axios.defaults.baseURL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const userRole = localStorage.getItem("user_role")
 

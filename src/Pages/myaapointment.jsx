@@ -17,6 +17,7 @@ const MyAppointments = () => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [appointmentsPerPage] = useState(5)
+  axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
   // Fetch appointments from the backend
   const fetchAppointments = useCallback(async () => {
@@ -29,7 +30,7 @@ const MyAppointments = () => {
         return
       }
 
-      const response = await axios.get("http://127.0.0.1:8000/api/user/appointments", {
+      const response = await axios.get("/user/appointments", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

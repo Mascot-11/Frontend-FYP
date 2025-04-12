@@ -4,13 +4,13 @@ import { motion} from "framer-motion";
 import {
   FaTachometerAlt,
   FaImages,
-  FaPaintBrush,
+  
   FaCalendarAlt,
   FaUser,
   FaCog
   
 } from "react-icons/fa";
-import { path } from "framer-motion/client";
+
 import { DollarSign } from "lucide-react";
 
 const AdminSidebar = () => {

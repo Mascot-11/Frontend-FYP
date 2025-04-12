@@ -45,13 +45,13 @@ export default function AboutPage() {
   const eventsRef = useRef(null)
   const ctaRef = useRef(null)
   const statsRef = useRef(null)
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+  const apiUrl = import.meta.env.VITE_API_URL;
   // InView states for scroll animations
-  const isHeroInView = useInView(heroRef, { once: false, amount: 0.2 })
+  
   const isFeaturesInView = useInView(featuresRef, { once: true, amount: 0.2 })
   const isAboutInView = useInView(aboutRef, { once: true, amount: 0.2 })
   const isTabsInView = useInView(tabsRef, { once: true, amount: 0.2 })
-  const isTeamInView = useInView(teamRef, { once: true, amount: 0.2 })
+ 
   const isServicesInView = useInView(servicesRef, { once: true, amount: 0.2 })
   const isTimelineInView = useInView(timelineRef, { once: true, amount: 0.2 })
   const isGalleryInView = useInView(galleryRef, { once: true, amount: 0.2 })
@@ -63,10 +63,11 @@ export default function AboutPage() {
   const { scrollYProgress } = useScroll()
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 })
 
-  const BASE_URL = "http://127.0.0.1:8000/api"
+  const BASE_URL = import.meta.env.VITE_API_URL;
+
 
   // Set axios default base URL
-  axios.defaults.baseURL = "http://127.0.0.1:8000/"
+  axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     setIsVisible(true)
@@ -87,7 +88,7 @@ export default function AboutPage() {
     // Fetch music events
     const fetchEvents = async () => {
       try {
-        const { data } = await axios.get("/api/events")
+        const { data } = await axios.get("/events")
         setEvents(data)
         setLoadingEvents(false)
       } catch (error) {

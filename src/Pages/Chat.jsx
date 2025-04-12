@@ -2,7 +2,7 @@ import  { useState, useEffect, useRef } from "react";
 import Echo from "laravel-echo";
 import Pusher from "pusher-js";
 
-const BASE_URL = "http://127.0.0.1:8000/";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const ChatApp = () => {
   const [messages, setMessages] = useState([]);
@@ -44,7 +44,7 @@ const ChatApp = () => {
     if (!checkAuthToken()) return;
 
     try {
-      const response = await fetch(`${BASE_URL}api/chats`, {
+      const response = await fetch(`${BASE_URL}/chats`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
@@ -66,7 +66,7 @@ const ChatApp = () => {
     if (!checkAuthToken()) return;
 
     try {
-      const response = await fetch(`${BASE_URL}api/chat/start`, {
+      const response = await fetch(`${BASE_URL}/chat/start`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +91,7 @@ const ChatApp = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${BASE_URL}api/chat/${chatId}/message`, {
+      const response = await fetch(`${BASE_URL}/chat/${chatId}/message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -127,7 +127,7 @@ const ChatApp = () => {
     if (!chatId || !checkAuthToken()) return;
 
     try {
-      const response = await fetch(`${BASE_URL}api/chat/${chatId}/messages`, {
+      const response = await fetch(`${BASE_URL}/chat/${chatId}/messages`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("auth_token")}`,

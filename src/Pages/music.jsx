@@ -11,10 +11,11 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const fetchEvents = async () => {
   const userToken = localStorage.getItem("auth_token");
-  const { data } = await axios.get("http://127.0.0.1:8000/api/events", {
+  const { data } = await axios.get("/events", {
     headers: {
       Authorization: `Bearer ${userToken}`,
     },
@@ -24,7 +25,7 @@ const fetchEvents = async () => {
 
 // Khalti callback function
 const fetchKhaltiCallback = async (khaltiData) => {
-  const { data } = await axios.post("http://127.0.0.1:8000/api/khalti/callback", khaltiData);
+  const { data } = await axios.post("/khalti/callback", khaltiData);
   return data;
 };
 

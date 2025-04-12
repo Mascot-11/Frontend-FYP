@@ -9,7 +9,7 @@ import "react-date-range/dist/theme/default.css";
 import { format, setHours, setMinutes } from "date-fns";
 import Subnav from "../components/subnavbar"; 
 import { FiPaperclip } from "react-icons/fi"; // Importing attachment icon
-
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 // Helper function to check if the user is logged in
 const checkLogin = () => {
   const token = localStorage.getItem("auth_token");
@@ -45,7 +45,7 @@ const TattooAppointment = () => {
     const fetchArtists = async () => {
       try {
         const token = localStorage.getItem("auth_token");
-        const response = await axios.get("http://127.0.0.1:8000/api/artists", {
+        const response = await axios.get("/artists", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -144,7 +144,7 @@ const TattooAppointment = () => {
 
       const token = localStorage.getItem("auth_token");
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/appointments",
+        "/appointments",
         formData,
         {
           headers: {

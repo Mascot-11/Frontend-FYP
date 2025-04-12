@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
@@ -7,10 +7,10 @@ import axios from "axios"
 import { gsap } from "gsap"
 import Subnav from "../components/subnavbar"
 
-axios.defaults.baseURL = "http://127.0.0.1:8000/"
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const fetchEvents = async () => {
-  const { data } = await axios.get("/api/events")
+  const { data } = await axios.get("/events")
   return data
 }
 
@@ -50,7 +50,7 @@ const EventCrudPage = () => {
 
   const addEventMutation = useMutation({
     mutationFn: async (formData) => {
-      const { data } = await axios.post("/api/events", formData, {
+      const { data } = await axios.post("/events", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       return data
@@ -63,7 +63,7 @@ const EventCrudPage = () => {
 
   const deleteEventMutation = useMutation({
     mutationFn: async (eventId) => {
-      await axios.delete(`/api/events/${eventId}`)
+      await axios.delete(`/events/${eventId}`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["events"])

@@ -5,7 +5,8 @@ import { MessageCircle, X, Send, Minimize2, User } from 'lucide-react'
 import Echo from "laravel-echo"
 import Pusher from "pusher-js"
 
-const BASE_URL = "http://127.0.0.1:8000/"
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 
 export default function ChatPopup() {
   const [isOpen, setIsOpen] = useState(false)
@@ -106,7 +107,7 @@ export default function ChatPopup() {
     if (!checkAuthToken()) return
 
     try {
-      const response = await fetch(`${BASE_URL}api/chats`, {
+      const response = await fetch(`${BASE_URL}/chats`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -128,7 +129,7 @@ export default function ChatPopup() {
     if (!checkAuthToken()) return
 
     try {
-      const response = await fetch(`${BASE_URL}api/chat/start`, {
+      const response = await fetch(`${BASE_URL}/chat/start`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -155,7 +156,7 @@ export default function ChatPopup() {
     setLoading(true)
 
     try {
-      const response = await fetch(`${BASE_URL}api/chat/${chatId}/message`, {
+      const response = await fetch(`${BASE_URL}/chat/${chatId}/message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -189,7 +190,7 @@ export default function ChatPopup() {
     if (!chatId || !checkAuthToken()) return
 
     try {
-      const response = await fetch(`${BASE_URL}api/chat/${chatId}/messages`, {
+      const response = await fetch(`${BASE_URL}/chat/${chatId}/messages`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,

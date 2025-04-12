@@ -21,7 +21,7 @@ const navItems = [
 const IMAGES_PER_PAGE = 9
 
 const TattooGallery = () => {
-  const BASE_URL = "http://127.0.0.1:8000/api"
+  const BASE_URL = import.meta.env.VITE_API_URL;
   const [images, setImages] = useState([])
   const [displayedImages, setDisplayedImages] = useState([])
   const [loading, setLoading] = useState(true)

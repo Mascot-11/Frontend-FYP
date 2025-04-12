@@ -42,11 +42,12 @@ const Dashboard = () => {
 
   const [loading, setLoading] = useState(true)
   const [setShowModal] = useState(false)
-
+  const BASE_URL = import.meta.env.VITE_API_URL;
+  axios.defaults.baseURL = import.meta.env.VITE_API_URL;
   // Function to fetch payments data
   const fetchPayments = async (headers) => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/payments/all", { headers })
+      const response = await axios.get(`${BASE_URL}/payments/all`, { headers })
       return response.data.payments || []
     } catch (error) {
       console.error("Error fetching payments:", error)
@@ -67,18 +68,18 @@ const Dashboard = () => {
           Authorization: `Bearer ${authToken}`,
         }
 
-        const users = await axios.get("http://127.0.0.1:8000/api/users", {
+        const users = await axios.get(`${BASE_URL}/users`, {
           headers,
         })
-        const appointments = await axios.get("http://127.0.0.1:8000/api/appointments", { headers })
-        const gallery = await axios.get("http://127.0.0.1:8000/api/tattoo-gallery", { headers })
-        const chats = await axios.get("http://127.0.0.1:8000/api/chats", {
+        const appointments = await axios.get(`${BASE_URL}/appointments`, { headers })
+        const gallery = await axios.get(`${BASE_URL}/tattoo-gallery`, { headers })
+        const chats = await axios.get("/chats", {
           headers,
         })
-        const artists = await axios.get("http://127.0.0.1:8000/api/artists", {
+        const artists = await axios.get("/artists", {
           headers,
         })
-        const events = await axios.get("http://127.0.0.1:8000/api/events", { headers })
+        const events = await axios.get("/events", { headers })
 
         // Fetch payments data using the dedicated function
         const payments = await fetchPayments(headers)

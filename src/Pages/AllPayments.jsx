@@ -23,7 +23,7 @@ const AllPayments = () => {
   const [sortOrder, setSortOrder] = useState("newest")
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPayment, setSelectedPayment] = useState(null)
-
+  axios.defaults.baseURL = import.meta.env.VITE_API_URL;
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [paymentsPerPage] = useState(6)
@@ -34,7 +34,7 @@ const AllPayments = () => {
         const token = localStorage.getItem("auth_token")
 
         // Fetch all payments
-        const paymentsResponse = await axios.get("http://127.0.0.1:8000/api/payments/all", {
+        const paymentsResponse = await axios.get("/payments/all", {
           headers: { Authorization: `Bearer ${token}` },
         })
 
@@ -44,7 +44,7 @@ const AllPayments = () => {
         }, 500)
 
         // Fetch all events
-        const eventsResponse = await axios.get("http://127.0.0.1:8000/api/events")
+        const eventsResponse = await axios.get("/events")
         const eventMap = {}
         eventsResponse.data.forEach((event) => {
           eventMap[event.id] = {

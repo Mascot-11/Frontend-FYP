@@ -1,11 +1,11 @@
 import axios from "axios";
 
-const BASE_URL = "http://127.0.0.1:8000"; // Update with your backend base URL
+const BASE_URL = import.meta.env.VITE_API_URL;// Update with your backend base URL
 const AUTH_TOKEN_KEY = "auth_token";
 axios.defaults.withCredentials = true;
 // Create axios instance
 const api = axios.create({
-  baseURL: `${BASE_URL}/api`,
+  baseURL: `${BASE_URL}`,
   withCredentials: true, // Ensure credentials (cookies) are included in requests
 });
 
@@ -18,7 +18,8 @@ const getAuthHeaders = () => {
 // Fetch CSRF token
 const getCSRFToken = async () => {
   try {
-    await axios.get(`${BASE_URL}/sanctum/csrf-cookie`, {
+    await axios.get(`${BASE_URL.replace('/api', '')}/sanctum/csrf-cookie`, {
+
       withCredentials: true,
     });
   } catch (error) {
@@ -37,7 +38,7 @@ export const login = async (credentials) => {
 
     await getCSRFToken(); // Ensure CSRF token is set before making login request
 
-    const response = await axios.post(`${BASE_URL}/api/login`, credentials);
+    const response = await axios.post(`${BASE_URL}/login`, credentials);
 
     const { access_token, user } = response.data;
     if (access_token) {
@@ -63,7 +64,7 @@ export const register = async (userData) => {
 
     // Make the POST request to register the user
     const response = await axios.post(
-      `${BASE_URL}/api/register`,
+      `${BASE_URL}/register`,
       userWithRole,
       {
         withCredentials: true, // Ensure credentials are sent along with the request
@@ -146,7 +147,7 @@ export const isAuthenticated = () => {
 export const getUsers = async () => {
   try {
     const token = localStorage.getItem("auth_token");
-    const response = await axios.get(`${BASE_URL}/api/users`, {
+    const response = await axios.get(`${BASE_URL}/users`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -162,7 +163,7 @@ export const getUsers = async () => {
 export const addUser = async (userData) => {
   try {
     const token = localStorage.getItem("auth_token");
-    const response = await axios.post(`${BASE_URL}/api/users`, userData, {
+    const response = await axios.post(`${BASE_URL}/users`, userData, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -179,7 +180,7 @@ export const updateUser = async (userId, userData) => {
   try {
     const token = localStorage.getItem("auth_token");
     const response = await axios.put(
-      `${BASE_URL}/api/users/${userId}`,
+      `${BASE_URL}/users/${userId}`,
       userData,
       {
         headers: {
@@ -201,7 +202,7 @@ export const updateUser = async (userId, userData) => {
 export const deleteUser = async (userId) => {
   try {
     const token = localStorage.getItem("auth_token");
-    const response = await axios.delete(`${BASE_URL}/api/users/${userId}`, {
+    const response = await axios.delete(`${BASE_URL}/users/${userId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -27,7 +27,7 @@ const UserPayments = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState(null)
   const [selectedEvent, setSelectedEvent] = useState(null)
-
+  axios.defaults.baseURL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     if (!userId) {
       console.error("User ID is missing")
@@ -40,7 +40,7 @@ const UserPayments = () => {
         const token = localStorage.getItem("auth_token")
 
         // Fetch payments
-        const paymentsResponse = await axios.get(`http://127.0.0.1:8000/api/payments/user/${userId}`, {
+        const paymentsResponse = await axios.get(`payments/user/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 
@@ -52,7 +52,7 @@ const UserPayments = () => {
         }, 500)
 
         // Fetch events
-        const eventsResponse = await axios.get("http://127.0.0.1:8000/api/events")
+        const eventsResponse = await axios.get("/events")
         const eventMap = {}
         eventsResponse.data.forEach((event) => {
           eventMap[event.id] = {
@@ -244,7 +244,7 @@ const UserPayments = () => {
                   <FaCreditCard className="text-gray-400 text-3xl" />
                 </div>
                 <h3 className="text-xl font-medium text-gray-700 mb-2">No Payments Found</h3>
-                <p className="text-gray-500">You haven't made any payments yet.</p>
+                <p className="text-gray-500">You havent made any payments yet.</p>
               </motion.div>
             )}
           </AnimatePresence>

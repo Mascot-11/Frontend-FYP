@@ -5,7 +5,8 @@ import { useParams } from "react-router-dom"
 import axios from "axios"
 import { motion, AnimatePresence } from "framer-motion"
 
-axios.defaults.baseURL = "http://127.0.0.1:8000/"
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
+
 
 const EventViewPage = () => {
   const [event, setEvent] = useState(null)
@@ -17,7 +18,7 @@ const EventViewPage = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await axios.get(`/api/events/${eventId}`, {
+        const response = await axios.get(`/events/${eventId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
