@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
@@ -28,25 +26,27 @@ const EventCrudPage = () => {
 
   const {
     data: events = [],
-    isLoading,
+    isLoading: isFetchingEvents,
     error,
   } = useQuery({
     queryKey: ["events"],
     queryFn: fetchEvents,
   })
 
-  const filteredEvents =
-    userRole === "admin" ? events : events?.filter((event) => event.date >= new Date().toISOString().split("T")[0])
-
   const [isAdding, setIsAdding] = useState(false)
   const [newEvent, setNewEvent] = useState({
     name: "",
     description: "",
     date: "",
+    time: "",
+    location: "",
     price: "",
     available_tickets: "",
     image: null,
   })
+
+  const [editEventId, setEditEventId] = useState(null)
+  const [isImageLoading, setIsImageLoading] = useState(false)
 
   const addEventMutation = useMutation({
     mutationFn: async (formData) => {
@@ -61,6 +61,20 @@ const EventCrudPage = () => {
     },
   })
 
+  const updateEventMutation = useMutation({
+    mutationFn: async ({ id, formData }) => {
+      const { data } = await axios.post(`/events/${id}?_method=PUT`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["events"])
+      setIsAdding(false)
+      setEditEventId(null)
+    },
+  })
+
   const deleteEventMutation = useMutation({
     mutationFn: async (eventId) => {
       await axios.delete(`/events/${eventId}`)
@@ -70,8 +84,19 @@ const EventCrudPage = () => {
     },
   })
 
-  const handleEditClick = (eventId) => {
-    navigate(`/events/${eventId}/edit`)
+  const handleEditClick = (event) => {
+    setEditEventId(event.id)
+    setNewEvent({
+      name: event.name,
+      description: event.description,
+      date: event.date,
+      time: event.time,
+      location: event.location,
+      price: event.price,
+      available_tickets: event.available_tickets,
+      image: null,
+    })
+    setIsAdding(true)
   }
 
   const handleDeleteEvent = (eventId) => {
@@ -91,7 +116,11 @@ const EventCrudPage = () => {
       formData.append(key, newEvent[key])
     })
 
-    addEventMutation.mutate(formData)
+    if (editEventId) {
+      updateEventMutation.mutate({ id: editEventId, formData })
+    } else {
+      addEventMutation.mutate(formData)
+    }
   }
 
   const handleChange = (e) => {
@@ -99,7 +128,9 @@ const EventCrudPage = () => {
   }
 
   const handleFileChange = (e) => {
+    setIsImageLoading(true)
     setNewEvent((prevEvent) => ({ ...prevEvent, image: e.target.files[0] }))
+    setIsImageLoading(false)
   }
 
   useEffect(() => {
@@ -112,7 +143,7 @@ const EventCrudPage = () => {
     })
 
     // Events staggered animation
-    if (filteredEvents.length > 0) {
+    if (events?.length > 0) {
       gsap.from(eventsRef.current, {
         opacity: 0,
         y: 50,
@@ -122,9 +153,9 @@ const EventCrudPage = () => {
         delay: 0.5,
       })
     }
-  }, [filteredEvents])
+  }, [events])
 
-  if (isLoading) {
+  if (isFetchingEvents) {
     return <div className="text-center py-10 text-xl">Loading events...</div>
   }
 
@@ -160,7 +191,7 @@ const EventCrudPage = () => {
 
       {isAdding ? (
         <div className="bg-white p-6 shadow-xl rounded-lg mx-auto max-w-2xl">
-          <h2 className="text-2xl font-semibold mb-4">Add Event</h2>
+          <h2 className="text-2xl font-semibold mb-4">{editEventId ? "Edit Event" : "Add Event"}</h2>
           <form onSubmit={handleAddEvent} encType="multipart/form-data">
             <div className="space-y-4">
               <input
@@ -189,6 +220,23 @@ const EventCrudPage = () => {
                 className="w-full p-3 border rounded"
               />
               <input
+                type="time"
+                name="time"
+                value={newEvent.time}
+                onChange={handleChange}
+                required
+                className="w-full p-3 border rounded"
+              />
+              <input
+                type="text"
+                name="location"
+                value={newEvent.location}
+                onChange={handleChange}
+                required
+                placeholder="Location"
+                className="w-full p-3 border rounded"
+              />
+              <input
                 type="number"
                 name="price"
                 value={newEvent.price}
@@ -213,6 +261,7 @@ const EventCrudPage = () => {
                 required
                 className="w-full p-3 border rounded"
               />
+              {isImageLoading && <p className="text-center text-blue-500 mt-2">Image is loading...</p>}
               <div className="flex justify-end space-x-4">
                 <button
                   type="button"
@@ -222,7 +271,7 @@ const EventCrudPage = () => {
                   Cancel
                 </button>
                 <button type="submit" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-                  Save Event
+                  {editEventId ? "Update Event" : "Save Event"}
                 </button>
               </div>
             </div>
@@ -230,31 +279,37 @@ const EventCrudPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredEvents.length === 0 ? (
+          {events.length === 0 ? (
             <div className="text-center text-gray-500 col-span-full">No upcoming events available</div>
           ) : (
-            filteredEvents.map((event, index) => (
+            events.map((event, index) => (
               <div
                 key={event.id}
                 ref={(el) => (eventsRef.current[index] = el)}
                 className="bg-white shadow-xl rounded-lg overflow-hidden"
               >
-                <img
-                  src={event.image_url || "/placeholder.svg?height=224&width=400"}
-                  alt={event.name}
-                  className="w-full h-56 object-cover"
-                />
+                <div className="w-full h-56 bg-gray-200 relative">
+                  {isFetchingEvents && <div className="absolute inset-0 flex justify-center items-center text-white">Loading Image...</div>}
+                  <img
+                    src={event.image_url || "/placeholder.svg?height=224&width=400"}
+                    alt={event.name}
+                    className="w-full h-56 object-cover"
+                    onLoad={() => setIsImageLoading(false)}
+                    onError={() => setIsImageLoading(false)}
+                  />
+                </div>
                 <div className="p-6">
                   <h2 className="text-xl font-semibold text-gray-800">{event.name}</h2>
                   <p className="text-gray-600 mt-2">{event.description}</p>
                   <div className="flex justify-between items-center mt-4">
-                    <span className="text-gray-500">{new Date(event.date).toLocaleDateString()}</span>
+                    <span className="text-gray-500">{new Date(event.date).toLocaleDateString()} {event.time}</span>
                     <span className="font-semibold text-black-600">NPR {event.price}</span>
                   </div>
+                  <p className="text-gray-500 mt-2">{event.location}</p>
                   {userRole === "admin" ? (
                     <>
                       <button
-                        onClick={() => handleEditClick(event.id)}
+                        onClick={() => handleEditClick(event)}
                         className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-green-700 w-full mt-3"
                       >
                         Edit
@@ -285,4 +340,3 @@ const EventCrudPage = () => {
 }
 
 export default EventCrudPage
-

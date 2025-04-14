@@ -200,6 +200,22 @@ const TicketPurchasePage = () => {
           </motion.div>
 
           <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
+            <div className="flex items-center space-x-2 text-gray-600">
+              <Calendar className="w-5 h-5" />
+              <span>Location: {event.location}</span>
+            </div>
+            <div className="flex items-center space-x-2 text-gray-600">
+              <Calendar className="w-5 h-5" />
+              <span>Time: {new Date(event.date).toLocaleTimeString()}</span>
+            </div>
+          </motion.div>
+
+          <motion.div
             className="mb-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -243,4 +259,3 @@ const TicketPurchasePage = () => {
 }
 
 export default TicketPurchasePage
-

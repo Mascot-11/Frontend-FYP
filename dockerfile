@@ -1,5 +1,5 @@
 # Use official Node image as base
-FROM node:18
+FROM node:23-slim
 
 # Set working directory
 WORKDIR /app
@@ -12,5 +12,5 @@ RUN npm install
 COPY . .
 
 # Expose port and start the development server
-EXPOSE 3000
-CMD ["npm", "start"]
+EXPOSE 5173 
+CMD ["npm", "run", "dev"]

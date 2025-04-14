@@ -40,7 +40,7 @@ const ColorModeEvents = () => {
   const { data: allEvents, isLoading, isError } = useQuery({
     queryKey: ["events"],
     queryFn: fetchEvents,
-    staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
+    staleTime: 1* 60 * 1000, // Cache data for 1 minutes
   });
   
   const { data: khaltiResponse, isLoading: isKhaltiLoading, isError: isKhaltiError } = useQuery({
