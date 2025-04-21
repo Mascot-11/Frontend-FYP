@@ -13,7 +13,7 @@ gsap.registerPlugin(ScrollTrigger)
 const navItems = [
   { title: "Home", path: "/" },
   { title: "Gallery", path: "/gallery" },
-  { title: "Artists", path: "/artists" },
+
   { title: "Appointment", path: "/appointment" },
   { title: "FAQs", path: "/faq" },
 ]

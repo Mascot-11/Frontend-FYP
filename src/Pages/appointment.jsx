@@ -24,12 +24,12 @@ const checkLogin = () => {
 };
 
 const navItems = [
-  { title: "Home", path: "/tattoo" },
+  { title: "Home", path: "/" },
   { title: "Gallery", path: "/gallery" },
-  { title: "Artists", path: "/artists" },
+
   { title: "Appointment", path: "/appointment" },
   { title: "FAQs", path: "/faq" },
-];
+]
 
 const TattooAppointment = () => {
   const [artistId, setArtistId] = useState("");

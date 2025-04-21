@@ -32,6 +32,7 @@ import AdminLayout from "./components/AdminLayout"
 import ChatPopup from "./components/ChatPop"
 import UserPayments from "./Pages/User Payment"
 import AllPayments from "./Pages/AllPayments"
+import Footer from "./components/Footer"
 
 // Create a QueryClient instance
 const queryClient = new QueryClient()
@@ -134,7 +135,7 @@ const App = () => {
             <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/resetpassword" element={<ResetPassword />} />
             <Route path="/appointment" element={<AppointmentPage />} />
-            <Route path="/chat" element={<Chat />} />
+           
             <Route path="/gallery" element={<TattooGallery />} />
             <Route path="/events" element={<EventCrudPage />} />
             <Route path="/events/:eventId/edit" element={<EventEditPage />} />
@@ -166,6 +167,7 @@ const App = () => {
 
             <Route element={<AdminLayout />}>
               <Route path="/admin/landing" element={<Landing />} />
+              <Route path="/chat" element={<Chat />} />
               <Route path="/admin/dashboard" element={<Dashboard />} />
               <Route path="/admin/users" element={<UserList />} />
               <Route path="/events/:eventId/edit" element={<EventEditPage />} />
@@ -177,6 +179,7 @@ const App = () => {
             <Route path="*" element={<h2>Page not found</h2>} />
           </Routes>
         </div>
+        <Footer />
       </>
     )
   }

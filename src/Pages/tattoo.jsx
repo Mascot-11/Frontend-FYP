@@ -82,10 +82,10 @@ const TattooStudio = () => {
   const navItems = [
     { title: "Home", path: "/" },
     { title: "Gallery", path: "/gallery" },
-    { title: "Artists", path: "/artists" },
+  
     { title: "Appointment", path: "/appointment" },
     { title: "FAQs", path: "/faq" },
-  ];
+  ]
 
   return (
     <div className="bg-gradient-to-b from-gray-900 to-black text-gray-100 min-h-screen relative">

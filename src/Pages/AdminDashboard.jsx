@@ -7,7 +7,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
+  LineChart, 
   Line,
   PieChart,
   Pie,
@@ -19,8 +19,10 @@ import {
 import { Users, Calendar, ImageIcon, MessageCircle, Brush, DollarSign } from "lucide-react"
 import { ClimbingBoxLoader } from "react-spinners"
 import { motion } from "framer-motion"
+import { ToastContainer, toast } from "react-toastify"
 
 const Dashboard = () => {
+<ToastContainer/>
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalAppointments: 0,
@@ -39,7 +41,18 @@ const Dashboard = () => {
     totalPayments: 0,
     payments: [],
   })
-
+  const checkLogin = () => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      toast.error("You must be logged in to view this page.", {
+        autoClose: 6000, // Show the toast for 6 seconds
+      });
+      setTimeout(() => {
+        window.location.href = "/login"; // Redirecting to login page after 6 seconds
+      }, 6000);
+    }
+  };
+  
   const [loading, setLoading] = useState(true)
   const [setShowModal] = useState(false)
   const BASE_URL = import.meta.env.VITE_API_URL;
@@ -55,6 +68,7 @@ const Dashboard = () => {
     }
   }
   useEffect(() => {
+    checkLogin();
     const fetchStats = async () => {
       const authToken = localStorage.getItem("auth_token")
 
@@ -546,9 +560,11 @@ const Dashboard = () => {
               </motion.div>
             )}
           </div>
+          <ToastContainer />
         </motion.div>
       )}
     </div>
+    
   )
 }
 

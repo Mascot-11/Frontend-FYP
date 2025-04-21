@@ -129,7 +129,7 @@ const AdminTattooGallery = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-white text-black flex-grow">
       <ToastContainer
         position="top-right"
         autoClose={3000}

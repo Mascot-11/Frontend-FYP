@@ -199,7 +199,7 @@ const ChatApp = () => {
   return (
     <div className="flex h-screen bg-white">
       {/* Navigation */}
-      <div className="w-64 bg-black border-r border-gray-800 overflow-y-auto">
+      <div className="w-64 bg-black border-r border-gray-800 overflow-y-auto ml-12">
         <div className="p-4">
           <h2 className="text-xl font-bold text-white mb-4">Chats</h2>
           {isAdmin ? (
