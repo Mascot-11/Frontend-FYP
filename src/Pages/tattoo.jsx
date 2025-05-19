@@ -226,12 +226,7 @@ const TattooStudio = () => {
                   <h3 className="text-2xl font-semibold text-white mb-2">
                     {artist.name}
                   </h3>
-                  <p className="text-gray-300">
-                    Specializing in {artist.specialty}
-                  </p>
-                  <p className="text-gray-400 mt-2">
-                    {artist.experience} of experience
-                  </p>
+                 
                 </motion.div>
               ))
             ) : (
@@ -241,65 +236,188 @@ const TattooStudio = () => {
         </motion.section>
 
         <motion.section
-          initial="initial"
-          animate="animate"
-          variants={staggerChildren}
-          className="bg-gray-800 p-8 rounded-xl shadow-xl"
+  initial="initial"
+  animate="animate"
+  variants={staggerChildren}
+  className="bg-black bg-opacity-80 p-8 md:p-12 lg:p-16 rounded-2xl shadow-2xl border border-white/10 max-w-5xl mx-auto backdrop-blur-sm"
+>
+  <motion.h2
+    className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-10 border-b border-white/20 pb-6"
+    variants={fadeInUp}
+  >
+    Essential Tattoo Care Guide
+  </motion.h2>
+  
+  <motion.div 
+    className="mb-12"
+    variants={fadeInUp}
+  >
+    <p className="text-gray-300 text-lg md:text-xl italic border-l-4 border-white/30 pl-6">
+      A tattoo is not just art on your skin. it is an investment that deserves proper care and attention.
+    </p>
+  </motion.div>
+  
+  <motion.div className="mb-16" variants={fadeInUp}>
+    <h3 className="text-2xl md:text-3xl font-semibold text-white mb-6">Initial Recovery Phase (1-2 Weeks)</h3>
+    <p className="text-gray-300 mb-8">The first few weeks are crucial for your tattoo long-term appearance. Follow these essential steps:</p>
+    
+    <motion.ul className="grid grid-cols-1 md:grid-cols-2 gap-8" variants={staggerChildren}>
+      {[
+        {
+          icon: Droplet,
+          title: "Keep It Clean",
+          tip: "Wash your tattoo gently with unscented, antibacterial soap and lukewarm water 2-3 times daily. Pat dry with a clean, soft towel - never rub."
+        },
+        {
+          icon: Sun,
+          title: "Avoid Direct Sunlight",
+          tip: "Protect your new tattoo from UV rays completely during healing. Sun exposure can cause fading and damage to fresh ink."
+        },
+        {
+          icon: Heart,
+          title: "Moisturize Properly",
+          tip: "Apply a thin layer of unscented, hypoallergenic lotion or specialized tattoo aftercare product 3-4 times daily to keep skin hydrated."
+        },
+        {
+          icon: Droplet,
+          title: "Avoid Submerging",
+          tip: "Keep your tattoo away from pools, hot tubs, baths, and natural bodies of water until fully healed to prevent infection."
+        }
+      ].map((item, index) => (
+        <motion.li
+          key={index}
+          className="flex items-start group bg-white/5 p-6 rounded-xl hover:bg-white/10 transition-all duration-300"
+          variants={fadeInUp}
         >
-          <motion.h2
-            className="text-4xl font-bold text-white mb-8"
-            variants={fadeInUp}
-          >
-            Essential Tattoo Care Tips
-          </motion.h2>
-          <motion.ul className="space-y-6" variants={staggerChildren}>
-            {[
-              {
-                icon: Droplet,
-                tip: "Keep it clean: Wash your tattoo gently with unscented soap and lukewarm water. Pat dry with a clean, soft towel.",
-              },
-              {
-                icon: Sun,
-                tip: "Avoid direct sunlight: Protect your new tattoo from UV rays. Once healed, always use a high SPF sunscreen on tattooed areas when exposed to the sun.",
-              },
-              {
-                icon: Heart,
-                tip: "Moisturize: Apply a thin layer of unscented, hypoallergenic lotion to keep your skin hydrated and promote healing.",
-              },
-            ].map((item, index) => (
-              <motion.li
-                key={index}
-                className="flex items-start"
-                variants={fadeInUp}
-              >
-                <item.icon className="w-8 h-8 mr-4 text-white flex-shrink-0" />
-                <p className="text-gray-300 text-lg">{item.tip}</p>
-              </motion.li>
-            ))}
-          </motion.ul>
-          <motion.div className="mt-8" variants={fadeInUp}>
-            <h3 className="text-2xl font-semibold text-white mb-4">
-              Long-term Tattoo Care
-            </h3>
-            <ul className="list-disc list-inside space-y-2 text-gray-300">
-              <li>
-                Keep your tattoo moisturized, especially in dry climates or
-                seasons.
-              </li>
-              <li>
-                Protect your tattoo from prolonged sun exposure to prevent
-                fading.
-              </li>
-              <li>
-                Maintain a healthy lifestyle to keep your skin and tattoo
-                looking their best.
-              </li>
-              <li>
-                Touch up your tattoo after several years to keep it vibrant.
-              </li>
-            </ul>
-          </motion.div>
-        </motion.section>
+          <div className="w-14 h-14 rounded-full bg-white bg-opacity-10 flex items-center justify-center mr-6 flex-shrink-0 group-hover:bg-white/20 transition-all duration-300">
+            <item.icon className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h4 className="text-xl font-semibold text-white mb-2">{item.title}</h4>
+            <p className="text-gray-300 font-light">{item.tip}</p>
+          </div>
+        </motion.li>
+      ))}
+    </motion.ul>
+  </motion.div>
+  
+  <motion.div className="mb-16" variants={fadeInUp}>
+    <h3 className="text-2xl md:text-3xl font-semibold text-white mb-6 inline-block relative">
+      Healing Timeline
+      <span className="absolute -bottom-1 left-0 w-1/2 h-px bg-gradient-to-r from-white to-transparent"></span>
+    </h3>
+    
+    <div className="space-y-6">
+      {[
+        {
+          days: "Days 1-3",
+          description: "Your tattoo will feel sore and may appear bright red. Some oozing and bleeding is normal. Keep it clean and apply aftercare ointment."
+        },
+        {
+          days: "Days 4-6",
+          description: "The tattoo will begin to form a scab and may itch. Resist scratching or picking at it, as this can remove ink and cause scarring."
+        },
+        {
+          days: "Days 7-14",
+          description: "The scabs will start to flake and peel naturally. The tattoo may look dull temporarily - this is normal during healing."
+        },
+        {
+          days: "Days 15-30",
+          description: "Most of the surface healing is complete, but the deeper layers are still recovering. Continue moisturizing and avoiding direct sun exposure."
+        }
+      ].map((phase, index) => (
+        <motion.div 
+          key={index}
+          className="flex items-start border-l-2 border-white/20 pl-6 pb-4"
+          variants={fadeInUp}
+        >
+          <div>
+            <h4 className="text-xl font-medium text-white mb-2">{phase.days}</h4>
+            <p className="text-gray-300 font-light">{phase.description}</p>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  </motion.div>
+  
+  <motion.div className="mb-16" variants={fadeInUp}>
+    <h3 className="text-2xl md:text-3xl font-semibold text-white mb-6 inline-block relative">
+      Long-term Tattoo Care
+      <span className="absolute -bottom-1 left-0 w-1/2 h-px bg-gradient-to-r from-white to-transparent"></span>
+    </h3>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <motion.div className="bg-white/5 p-6 rounded-xl" variants={fadeInUp}>
+        <h4 className="text-xl font-medium text-white mb-4">Daily Maintenance</h4>
+        <motion.ul 
+          className="space-y-3 text-gray-300"
+          variants={staggerChildren}
+        >
+          {[
+            "Keep your tattoo moisturized with quality lotion, especially in dry climates or seasons.",
+            "Use fragrance-free products on tattooed areas to prevent irritation.",
+            "Stay hydrated and maintain a healthy diet to preserve skin quality.",
+            "Clean the tattooed area with mild soap during regular showers."
+          ].map((tip, index) => (
+            <motion.li 
+              key={index} 
+              className="flex items-center"
+              variants={fadeInUp}
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-white mr-3 flex-shrink-0"></div>
+              <p className="text-gray-300 font-light">{tip}</p>
+            </motion.li>
+          ))}
+        </motion.ul>
+      </motion.div>
+      
+      <motion.div className="bg-white/5 p-6 rounded-xl" variants={fadeInUp}>
+        <h4 className="text-xl font-medium text-white mb-4">Sun Protection</h4>
+        <motion.ul 
+          className="space-y-3 text-gray-300"
+          variants={staggerChildren}
+        >
+          {[
+            "Always apply SPF 50+ sunscreen to exposed tattoos, even on cloudy days.",
+            "Reapply sunscreen every 2 hours when outdoors for extended periods.",
+            "Consider covering tattoos with UPF clothing for additional protection.",
+            "Remember that sun exposure is the leading cause of tattoo fading over time."
+          ].map((tip, index) => (
+            <motion.li 
+              key={index} 
+              className="flex items-center"
+              variants={fadeInUp}
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-white mr-3 flex-shrink-0"></div>
+              <p className="text-gray-300 font-light">{tip}</p>
+            </motion.li>
+          ))}
+        </motion.ul>
+      </motion.div>
+    </div>
+  </motion.div>
+  
+  <motion.div className="p-8 border border-white/10 rounded-xl bg-white/5" variants={fadeInUp}>
+    <h3 className="text-2xl md:text-3xl font-semibold text-white mb-4 text-center">When to See Your Tattoo Artist</h3>
+    <p className="text-gray-300 text-center mb-6">Schedule a follow-up appointment if you notice any of the following:</p>
+    
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+      <div className="p-4">
+        <p className="text-white font-medium mb-2">Significant Fading</p>
+        <p className="text-gray-400 text-sm">After 5-10 years, your tattoo may need professional touch-ups to restore vibrance.</p>
+      </div>
+      <div className="p-4">
+        <p className="text-white font-medium mb-2">Uneven Healing</p>
+        <p className="text-gray-400 text-sm">If areas of your tattoo healed inconsistently, a touch-up may be needed.</p>
+      </div>
+      <div className="p-4">
+        <p className="text-white font-medium mb-2">Design Enhancement</p>
+        <p className="text-gray-400 text-sm">If you wish to expand or modify your existing tattoo with additional elements.</p>
+      </div>
+    </div>
+  </motion.div>
+</motion.section>
+
       </main>
     </div>
   );

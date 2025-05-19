@@ -99,7 +99,7 @@ const Subnav = ({ backButton = true, navItems = [] }) => {
   );
 };
 
-// ✅ PropTypes Validation
+
 Subnav.propTypes = {
   backButton: PropTypes.bool,
   navItems: PropTypes.arrayOf(

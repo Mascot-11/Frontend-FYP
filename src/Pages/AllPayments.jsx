@@ -67,29 +67,29 @@ const AllPayments = () => {
     fetchPaymentsAndEvents()
   }, [])
 
-  // Format date to be more readable
+
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" }
     return new Date(dateString).toLocaleDateString(undefined, options)
   }
 
-  // Format time to be more readable
+
   const formatTime = (timeString) => {
     if (!timeString) return "N/A"
 
     try {
-      // Handle different time formats
+
       let time
       if (timeString.includes("T")) {
-        // ISO format
+ 
         time = new Date(timeString)
       } else if (timeString.includes(":")) {
-        // HH:MM:SS format
+  
         const [hours, minutes] = timeString.split(":")
         time = new Date()
         time.setHours(hours, minutes)
       } else {
-        return timeString // Return as is if format is unknown
+        return timeString 
       }
 
       return time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -99,7 +99,7 @@ const AllPayments = () => {
     }
   }
 
-  // Sort payments based on current sort order
+
   const getSortedPayments = () => {
     if (!payments.length) return []
 
@@ -128,7 +128,7 @@ const AllPayments = () => {
     })
   }
 
-  // Get current payments for pagination
+
   const sortedPayments = getSortedPayments()
   const indexOfLastPayment = currentPage * paymentsPerPage
   const indexOfFirstPayment = indexOfLastPayment - paymentsPerPage
@@ -142,7 +142,7 @@ const AllPayments = () => {
     }
   }
 
-  // Handle payment details view
+
   const handleViewDetails = (payment) => {
     setSelectedPayment(payment)
   }
@@ -151,7 +151,7 @@ const AllPayments = () => {
     setSelectedPayment(null)
   }
 
-  // Skeleton loading component
+
   const SkeletonCard = () => (
     <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
       <div className="p-4 space-y-3">

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { resetPassword } from "../Utils/api"; // Import the resetPassword API function
-import { useSearchParams, Link, useNavigate } from "react-router-dom"; // For routing and navigation
+import { resetPassword } from "../Utils/api"; 
+import { useSearchParams, Link, useNavigate } from "react-router-dom"; 
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -10,7 +10,7 @@ const ResetPassword = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  // Extract token from URL
+ 
   const token = searchParams.get("token");
 
   const handleSubmit = async (e) => {
@@ -28,14 +28,14 @@ const ResetPassword = () => {
       token,
     };
 
-    const result = await resetPassword(data); // Call the API
+    const result = await resetPassword(data); 
     setMessage(result.message);
 
-    // Redirect to login after a short delay if successful
+   
     if (result.success) {
       setTimeout(() => {
         navigate("/login");
-      }, 2000); // Redirect after 2 seconds
+      }, 2000); 
     }
   };
 

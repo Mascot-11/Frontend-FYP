@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from "../App"; // Import the auth context
+import { useAuth } from "../App"; 
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -17,13 +17,13 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get the auth context to check if user is already logged in
+ 
   const { isUserLoggedIn } = useAuth();
   
-  // Get the page they were trying to visit before being redirected to login
+ 
   const from = location.state?.from?.pathname || "/landing";
   
-  // If user is already logged in, redirect them
+
   useEffect(() => {
     if (isUserLoggedIn) {
       const userRole = localStorage.getItem("user_data") 

@@ -28,23 +28,23 @@ export default function Footer() {
             <h3 className="text-lg font-medium mb-3">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="#" className="text-sm text-gray-300 hover:text-white transition-colors">
+                <Link to="/landing" className="text-sm text-gray-300 hover:text-white transition-colors">
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="#" className="text-sm text-gray-300 hover:text-white transition-colors">
+                <Link to="/music" className="text-sm text-gray-300 hover:text-white transition-colors">
                   Music
                 </Link>
               </li>
               <li>
-                <Link to="#" className="text-sm text-gray-300 hover:text-white transition-colors">
-                  Merch
+                <Link to="/aboutus" className="text-sm text-gray-300 hover:text-white transition-colors">
+                  About US
                 </Link>
               </li>
               <li>
-                <Link to="#" className="text-sm text-gray-300 hover:text-white transition-colors">
-                  Contact Us
+                <Link to="/faq" className="text-sm text-gray-300 hover:text-white transition-colors">
+                  FAQs
                 </Link>
               </li>
             </ul>
@@ -54,8 +54,8 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-medium mb-3">Contact Information</h3>
             <address className="not-italic">
-              <p className="text-sm text-gray-300 mb-2">123 Art Street, Creativity City, AC 12345</p>
-              <p className="text-sm text-gray-300 mb-2">(555) 123-4567</p>
+              <p className="text-sm text-gray-300 mb-2">Art Street, Thamel City</p>
+              <p className="text-sm text-gray-300 mb-2">(111) 123-41111</p>
               <p className="text-sm text-gray-300">
                 <a href="mailto:info@colormode.com" className="hover:text-white transition-colors">
                   info@colormode.com

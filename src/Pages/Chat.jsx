@@ -14,7 +14,7 @@ const ChatApp = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Get logged-in user's ID
+  
   const userId = Number.parseInt(localStorage.getItem("user_id"));
 
   useEffect(() => {
@@ -24,8 +24,8 @@ const ChatApp = () => {
       fetchChats();
       fetchChats();
       const interval = setInterval(() => {
-        fetchChats(); // Fetch chat list every 15 seconds
-      }, 100000); // 15 seconds in milliseconds
+        fetchChats(); 
+      }, 100000); 
 
       return () => clearInterval(interval);
     }

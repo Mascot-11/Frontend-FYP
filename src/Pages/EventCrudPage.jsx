@@ -170,8 +170,8 @@ const EventCrudPage = () => {
         navItems={[
           { title: "Home", path: "/" },
           { title: "Events", path: "/events" },
-          { title: "About", path: "/about" },
-          { title: "Contact", path: "/contact" },
+          { title: "About", path: "/aboutus" },
+          { title: "FAQs", path: "/faq" },
         ]}
       />
       <header className="mb-8">

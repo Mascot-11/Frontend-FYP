@@ -21,6 +21,7 @@ import { ClimbingBoxLoader } from "react-spinners"
 import { motion } from "framer-motion"
 import { ToastContainer, toast } from "react-toastify"
 
+
 const Dashboard = () => {
 <ToastContainer/>
   const [stats, setStats] = useState({
@@ -45,10 +46,10 @@ const Dashboard = () => {
     const token = localStorage.getItem("auth_token");
     if (!token) {
       toast.error("You must be logged in to view this page.", {
-        autoClose: 6000, // Show the toast for 6 seconds
+        autoClose: 6000, 
       });
       setTimeout(() => {
-        window.location.href = "/login"; // Redirecting to login page after 6 seconds
+        window.location.href = "/login"; 
       }, 6000);
     }
   };
@@ -57,7 +58,7 @@ const Dashboard = () => {
   const [setShowModal] = useState(false)
   const BASE_URL = import.meta.env.VITE_API_URL;
   axios.defaults.baseURL = import.meta.env.VITE_API_URL;
-  // Function to fetch payments data
+  
   const fetchPayments = async (headers) => {
     try {
       const response = await axios.get(`${BASE_URL}/payments/all`, { headers })
@@ -95,7 +96,7 @@ const Dashboard = () => {
         })
         const events = await axios.get("/events", { headers })
 
-        // Fetch payments data using the dedicated function
+
         const payments = await fetchPayments(headers)
 
         const appointmentStatus = appointments.data.reduce(
@@ -154,31 +155,31 @@ const Dashboard = () => {
           }
         })
 
-        // Filter events to only include current and future events
+       
         const today = startOfToday()
         const activeEvents = events.data.filter((event) => {
           const eventDate = new Date(event.date || event.event_date)
           return isAfter(eventDate, today) || format(eventDate, "yyyy-MM-dd") === format(today, "yyyy-MM-dd")
         })
 
-        // Calculate total payments - using total_amount field from the API response
+       
         let totalPayments = 0
         if (Array.isArray(payments)) {
           payments.forEach((payment) => {
-            // Use total_amount field as the primary source
+           
             let amount = 0
             if (payment.total_amount !== undefined) {
               amount = Number.parseFloat(payment.total_amount) || 0
             } else if (payment.amount !== undefined) {
               amount = Number.parseFloat(payment.amount) || 0
             } else if (payment.price !== undefined && payment.quantity !== undefined) {
-              // If we have price and quantity but no total_amount
+       
               const price = Number.parseFloat(payment.price) || 0
               const quantity = Number.parseFloat(payment.quantity) || 0
               amount = price * quantity
             }
 
-            // Only count completed payments
+    
             if (payment.status === "Completed") {
               totalPayments += amount
             }
@@ -219,20 +220,20 @@ const Dashboard = () => {
     { name: "Pending", value: stats.appointmentStatus.pending },
   ]
 
-  // Format the total payments with commas for thousands
+  
   const formattedTotalPayments = stats.totalPayments.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
 
-  // Create payment data for chart - with improved error handling
+  
   const paymentsByEvent = stats.payments.reduce((acc, payment) => {
     // Only include completed payments
     if (payment.status !== "Completed") {
       return acc
     }
 
-    // Get event name with fallbacks
+
     const eventName =
       (payment.event && payment.event.name) || payment.event_name || `Event #${payment.event_id}` || "Unknown Event"
 
@@ -240,7 +241,7 @@ const Dashboard = () => {
       acc[eventName] = 0
     }
 
-    // Get amount with fallbacks - prioritize total_amount
+    
     let amount = 0
     if (payment.total_amount !== undefined) {
       amount = Number.parseFloat(payment.total_amount) || 0

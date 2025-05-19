@@ -1,19 +1,17 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { useParams } from "react-router-dom"
-import axios from "axios"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { Calendar } from "lucide-react";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
-
 const EventViewPage = () => {
-  const [event, setEvent] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [showFullDescription, setShowFullDescription] = useState(false)
-  const { eventId } = useParams()
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const { eventId } = useParams();
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -22,17 +20,17 @@ const EventViewPage = () => {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
-        })
-        setEvent(response.data)
-        setLoading(false)
+        });
+        setEvent(response.data);
+        setLoading(false);
       } catch (error) {
-        console.error("Error fetching event data:", error)
-        setError("Failed to load event data. Please try again later.")
-        setLoading(false)
+        console.error("Error fetching event data:", error);
+        setError("Failed to load event data. Please try again later.");
+        setLoading(false);
       }
-    }
-    fetchEvent()
-  }, [eventId])
+    };
+    fetchEvent();
+  }, [eventId]);
 
   if (loading) {
     return (
@@ -43,7 +41,7 @@ const EventViewPage = () => {
           transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
         />
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -53,14 +51,20 @@ const EventViewPage = () => {
           {error}
         </motion.div>
       </div>
-    )
+    );
   }
 
-  if (!event) return null
+  if (!event) return null;
 
   const toggleDescription = () => {
-    setShowFullDescription(!showFullDescription)
-  }
+    setShowFullDescription(!showFullDescription);
+  };
+
+  
+  const formatTime = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+  };
 
   return (
     <motion.div
@@ -102,8 +106,8 @@ const EventViewPage = () => {
           <span>{new Date(event.date).toLocaleDateString()}</span>
         </div>
         <div className="flex items-center space-x-2 text-gray-600">
-          <span className="font-semibold">Time:</span>
-          <span>{new Date(event.date).toLocaleTimeString()}</span>
+          <Calendar className="w-5 h-5" />
+          <span>Time: {formatTime(event.date)}</span>
         </div>
         <div className="flex items-center space-x-2 text-gray-600">
           <span className="font-semibold">Location:</span>
@@ -159,8 +163,7 @@ const EventViewPage = () => {
         </a>
       </motion.div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default EventViewPage
-
+export default EventViewPage;

@@ -39,19 +39,19 @@ const UserPayments = () => {
       try {
         const token = localStorage.getItem("auth_token")
 
-        // Fetch payments
+        
         const paymentsResponse = await axios.get(`payments/user/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 
         setUser(paymentsResponse.data.user)
 
-        // Add a small delay to make the loading animation visible
+        
         setTimeout(() => {
           setPayments(paymentsResponse.data.payments)
-        }, 500)
+        }, 700)
 
-        // Fetch events
+       
         const eventsResponse = await axios.get("/events")
         const eventMap = {}
         eventsResponse.data.forEach((event) => {
@@ -93,29 +93,29 @@ const UserPayments = () => {
     setSelectedEvent(null)
   }
 
-  // Format date to be more readable
+  
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" }
     return new Date(dateString).toLocaleDateString(undefined, options)
   }
 
-  // Format time to be more readable
+  
   const formatTime = (timeString) => {
     if (!timeString) return "N/A"
 
     try {
-      // Handle different time formats
+     
       let time
       if (timeString.includes("T")) {
-        // ISO format
+       
         time = new Date(timeString)
       } else if (timeString.includes(":")) {
-        // HH:MM:SS format
+       
         const [hours, minutes] = timeString.split(":")
         time = new Date()
         time.setHours(hours, minutes)
       } else {
-        return timeString // Return as is if format is unknown
+        return timeString 
       }
 
       return time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -125,12 +125,12 @@ const UserPayments = () => {
     }
   }
 
-  // Get payment method badge color
+  
   const getPaymentMethodColor = (method) => {
-    return "bg-gray-500" // No color for black and white theme
+    return "bg-gray-500" 
   }
 
-  // Skeleton loading component
+
   const SkeletonCard = () => (
     <div className="w-full border rounded-lg overflow-hidden shadow-sm">
       <div className="p-4 pb-2">
@@ -251,7 +251,7 @@ const UserPayments = () => {
         </div>
       )}
 
-      {/* Enhanced Modal for viewing payment and event details */}
+      {/*  Modal for viewing payment and event details */}
       <AnimatePresence>
         {isModalOpen && selectedPayment && selectedEvent && (
           <motion.div

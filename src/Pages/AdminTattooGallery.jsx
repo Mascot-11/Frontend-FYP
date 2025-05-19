@@ -26,7 +26,7 @@ const AdminTattooGallery = () => {
     const userRole = localStorage.getItem("user_role")
 
     if (userRole !== "admin") {
-      navigate("/unauthorized")
+      navigate("/login")
       toast.error("You do not have access to this page")
     } else {
       axios

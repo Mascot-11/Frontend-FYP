@@ -8,7 +8,7 @@ export default function FAQ() {
   const [activeMuralFaq, setActiveMuralFaq] = useState(null);
 
   const navItems = [
-    { title: "Tattoo", path: "/tatto", icon: Image },
+    { title: "Tattoo", path: "/tattoo", icon: Image },
     { title: "Gallery", path: "/gallery", icon: Image },
     { title: "Artists", path: "/artists", icon: Users },
     { title: "Appointment", path: "/appointment", icon: Users },

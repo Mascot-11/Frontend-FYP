@@ -32,7 +32,7 @@ const TattooGallery = () => {
   const observerRef = useRef(null)
   const loadMoreRef = useRef(null)
 
-  // Fetch all images initially
+
   useEffect(() => {
     axios
       .get(`${BASE_URL}/tattoo-gallery`)
@@ -50,7 +50,7 @@ const TattooGallery = () => {
       })
   }, [])
 
-  // Load more images when user scrolls to bottom
+  
   const loadMoreImages = useCallback(() => {
     if (loadingMore || !hasMore) return
 
@@ -60,7 +60,7 @@ const TattooGallery = () => {
     const startIndex = (nextPage - 1) * IMAGES_PER_PAGE
     const endIndex = nextPage * IMAGES_PER_PAGE
 
-    // Simulate a delay to show loading state
+    
     setTimeout(() => {
       const newImages = images.slice(startIndex, endIndex)
       setDisplayedImages((prev) => [...prev, ...newImages])
@@ -70,7 +70,7 @@ const TattooGallery = () => {
     }, 800)
   }, [loadingMore, hasMore, page, images])
 
-  // Set up intersection observer for infinite scroll
+  
   useEffect(() => {
     if (loading) return
 
@@ -99,57 +99,55 @@ const TattooGallery = () => {
     }
   }, [loading, hasMore, loadMoreImages])
 
-  // Set up animations when images are loaded
+
   useEffect(() => {
     if (!loading && containerRef.current) {
-      // Clear any existing ScrollTriggers
+     
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
 
-      // Get all image containers
+     
       const imageContainers = containerRef.current.querySelectorAll(".image-container")
 
-      // Set up animations for each image
+      
       imageContainers.forEach((container, index) => {
-        // Determine if this is a left or right image based on column position
-        // For a 3-column grid, indices 0, 3, 6, etc. are left column
-        // Indices 2, 5, 8, etc. are right column
+       
         const column = index % 3
         let xStart = 0
 
         if (column === 0) {
-          // Left column - come from left
+          
           xStart = -100
         } else if (column === 2) {
-          // Right column - come from right
+          
           xStart = 100
         }
 
-        // Initial state - hidden and moved from appropriate direction
+       
         gsap.set(container, {
           opacity: 0,
           x: xStart,
           y: 30,
         })
 
-        // Create the reveal animation with a more delayed start
+        
         gsap.to(container, {
           opacity: 1,
           x: 0,
           y: 0,
-          duration: 1.2, // Longer duration
+          duration: 1.2,
           ease: "power2.out",
           scrollTrigger: {
             trigger: container,
-            start: "top bottom-=50", // Start animation when element is more visible
+            start: "top bottom-=50", 
             end: "center center",
             toggleActions: "play none none none",
           },
-          delay: 0.2 + index * 0.15, // More delay between elements
+          delay: 0.2 + index * 0.15, 
         })
       })
     }
 
-    // Clean up all ScrollTriggers when component unmounts or changes
+   
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
     }
@@ -179,7 +177,7 @@ const TattooGallery = () => {
             <div ref={containerRef} className="max-w-7xl mx-auto rounded-xl p-4 md:p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 auto-rows-auto gap-4">
                 {displayedImages.map((image, index) => {
-                  // Determine the grid span based on index for a more interesting layout
+                 
                   const spans = [
                     "md:col-span-2 md:row-span-2", // Large
                     "", // Small

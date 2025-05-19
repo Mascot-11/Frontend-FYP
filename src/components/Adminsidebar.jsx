@@ -15,7 +15,7 @@ const AdminSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
-  // Automatically collapse the sidebar when the route changes, except for the dashboard
+  
   useEffect(() => {
     if (location.pathname !== "/admin/dashboard") {
       setIsOpen(false);
@@ -69,7 +69,7 @@ const AdminSidebar = () => {
               className="flex items-center py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200"
             >
               <item.icon
-                className="text-xl mr-3" // Fixed size for icons
+                className="text-xl mr-3"
               />
               {isOpen && (
                 <motion.span

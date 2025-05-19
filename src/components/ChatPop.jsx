@@ -17,12 +17,11 @@ export default function ChatPopup() {
   const [chats, setChats] = useState([])
   const [isAdmin, setIsAdmin] = useState(false)
   const messagesEndRef = useRef(null)
-  
-  // Get logged-in user's ID and token
+
   const userId = Number.parseInt(localStorage.getItem("user_id"))
   const token = localStorage.getItem("auth_token")
 
-  // Check authentication and set admin status
+
   useEffect(() => {
     const userRole = localStorage.getItem("user_role")
     setIsAdmin(userRole === "admin")
@@ -30,19 +29,19 @@ export default function ChatPopup() {
     if (userRole === "admin") {
       fetchChats()
       const interval = setInterval(() => {
-        fetchChats() // Fetch chat list periodically
+        fetchChats() 
       }, 15000)
 
       return () => clearInterval(interval)
     }
   }, [])
 
-  // Scroll to bottom of messages when new messages are added
+ 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [])
 
-  // Set up real-time communication with Pusher
+
   useEffect(() => {
     let echoInstance
 
@@ -77,14 +76,14 @@ export default function ChatPopup() {
     }
   }, [chatId, token])
 
-  // Fetch messages when chat ID changes
+
   useEffect(() => {
     if (chatId) {
       fetchMessages()
     }
   }, [chatId])
 
-  // Periodically fetch messages
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (chatId) {
@@ -216,7 +215,7 @@ export default function ChatPopup() {
   const toggleChat = () => {
     setIsOpen(!isOpen)
     
-    // If opening chat and not admin, create a new chat
+
     if (!isOpen && !isAdmin && !chatId) {
       createChat()
     }
@@ -357,20 +356,7 @@ export default function ChatPopup() {
             <div ref={messagesEndRef} />
           </div>
           
-          {/* Reply indicator */}
-          {/*replyingTo && (
-            <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600 truncate">
-                  <span className="font-medium">Replying to:</span> {replyingTo.content.substring(0, 30)}
-                  {replyingTo.content.length > 30 ? "..." : ""}
-                </div>
-                <button onClick={() => setReplyingTo(null)} className="text-red-500 hover:text-red-700 text-sm">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}*/}
+         
 
           {/* Footer with input */}
           {chatId && (

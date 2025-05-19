@@ -14,12 +14,12 @@ const MyAppointments = () => {
   const [imageLoading, setImageLoading] = useState(false)
   const [hasError, setHasError] = useState(false)
 
-  // Pagination state
+
   const [currentPage, setCurrentPage] = useState(1)
   const [appointmentsPerPage] = useState(5)
   axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
-  // Fetch appointments from the backend
+  
   const fetchAppointments = useCallback(async () => {
     try {
       const token = localStorage.getItem("auth_token")
@@ -36,11 +36,11 @@ const MyAppointments = () => {
         },
       })
 
-      console.log(response.data) // Log data to inspect
+      console.log(response.data)
       setAppointments(Array.isArray(response.data) ? response.data : [])
       setLoading(false)
     } catch (err) {
-      console.error(err) // Log the error for debugging
+      console.error(err) 
       setError("An error occurred while fetching appointments.")
       setLoading(false)
     }
@@ -50,20 +50,20 @@ const MyAppointments = () => {
     fetchAppointments()
   }, [fetchAppointments])
 
-  // Function to format the date (YYYY-MM-DD)
+
   const formatDate = (datetime) => {
     const date = new Date(datetime)
     if (isNaN(date)) {
       return "Invalid date"
     }
     const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, "0") // Months are zero-indexed
+    const month = String(date.getMonth() + 1).padStart(2, "0") 
     const day = String(date.getDate()).padStart(2, "0")
 
     return `${year}-${month}-${day}`
   }
 
-  // Function to format the time (1AM, 2PM format)
+
   const formatTime = (datetime) => {
     const date = new Date(datetime)
     if (isNaN(date)) {
@@ -72,7 +72,7 @@ const MyAppointments = () => {
     const hours = date.getHours()
     const minutes = date.getMinutes()
     const ampm = hours >= 12 ? "PM" : "AM"
-    const hour = hours % 12 || 12 // Convert 24hr format to 12hr format
+    const hour = hours % 12 || 12 
 
     return `${hour}${minutes > 0 ? `:${minutes.toString().padStart(2, "0")}` : ""} ${ampm}`
   }
@@ -104,7 +104,7 @@ const MyAppointments = () => {
     }
   }
 
-  // Error Boundary functionality
+  
   if (hasError) {
     return (
       <div className="error-container text-center text-red-600 mt-10">
@@ -207,7 +207,7 @@ const MyAppointments = () => {
 
             <div className="flex space-x-1">
               {[...Array(totalPages)].map((_, index) => {
-                // Show limited page numbers with ellipsis
+                
                 if (
                   index + 1 === 1 ||
                   index + 1 === totalPages ||

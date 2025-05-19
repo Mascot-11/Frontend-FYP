@@ -1,17 +1,17 @@
-// src/pages/EventDetailPage.js
+
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // For getting URL parameters
+import { useParams } from "react-router-dom"; 
 import axios from "axios";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 
 const EventDetailPage = () => {
-  const { eventId } = useParams(); // Get the eventId from the URL
+  const { eventId } = useParams(); 
   const [event, setEvent] = useState(null);
 
-  // Fetch event details
+ 
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
@@ -36,7 +36,7 @@ const EventDetailPage = () => {
       <h2 className="text-3xl font-bold mb-6">{event.name}</h2>
       <div className="bg-white p-6 shadow-md rounded-lg">
         <img
-          src={event.image_url} // Assuming the event object contains 'image_url'
+          src={event.image_url} 
           alt={event.name}
           className="w-full h-64 object-cover rounded-lg mb-4"
         />

@@ -11,19 +11,19 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setMessage(""); // Clear any previous message
+    setMessage(""); 
 
     try {
-      // Call the API to request a password reset
+     
       await forgotPassword(email);
       setMessage(
         "If an account exists for this email, you will receive password reset instructions."
       );
 
-      // Redirect to login page after successful password reset
+      
       setTimeout(() => {
-        navigate("/login"); // Redirect to the login page
-      }, 5000); // Delay the redirect by 2 seconds (for user to see the success message)
+        navigate("/login"); e
+      }, 5000); 
     } catch (error) {
       setMessage(`Error: ${error.response?.data.message || error.message}`);
     } finally {

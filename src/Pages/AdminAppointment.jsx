@@ -1,13 +1,9 @@
-"use client"
-
 import { useState, useEffect, useMemo } from "react"
 import PropTypes from "prop-types"
 import { Trash2, CheckCircle, XCircle, Eye, Search, ChevronLeft, ChevronRight } from "lucide-react"
-
-// Import the API functions
 import { fetchAppointments, updateAppointmentStatus, deleteAppointment } from "../Utils/api"
 
-// Custom Button Component
+
 const Button = ({
   children,
   className = "",
@@ -55,11 +51,11 @@ const AdminAppointments = () => {
   const [loading, setLoading] = useState(true)
   const [selectedAppointment, setSelectedAppointment] = useState(null)
 
-  // Pagination state
+
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
 
-  // Search state
+
   const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
@@ -76,7 +72,7 @@ const AdminAppointments = () => {
     fetchData()
   }, [])
 
-  // Filter appointments based on search query
+
   const filteredAppointments = useMemo(() => {
     if (!searchQuery.trim()) return appointments
 
@@ -87,13 +83,13 @@ const AdminAppointments = () => {
     })
   }, [appointments, searchQuery])
 
-  // Calculate pagination
+
   const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage)
   const indexOfLastItem = currentPage * itemsPerPage
   const indexOfFirstItem = indexOfLastItem - itemsPerPage
   const currentItems = filteredAppointments.slice(indexOfFirstItem, indexOfLastItem)
 
-  // Pagination controls
+
   const goToPage = (page) => {
     if (page < 1) page = 1
     if (page > totalPages) page = totalPages
@@ -134,8 +130,7 @@ const AdminAppointments = () => {
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value)
-    setCurrentPage(1) // Reset to first page when searching
-  }
+    setCurrentPage(1) 
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-white rounded-lg shadow-sm border">

@@ -8,17 +8,17 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { format, setHours, setMinutes } from "date-fns";
 import Subnav from "../components/subnavbar"; 
-import { FiPaperclip } from "react-icons/fi"; // Importing attachment icon
+import { FiPaperclip } from "react-icons/fi"; 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
-// Helper function to check if the user is logged in
+
 const checkLogin = () => {
   const token = localStorage.getItem("auth_token");
   if (!token) {
     toast.error("You must be logged in to book an appointment.", {
-      autoClose: 6000, // Show the toast for 6 seconds
+      autoClose: 6000,
     });
     setTimeout(() => {
-      window.location.href = "/login"; // Redirecting to login page after 6 seconds
+      window.location.href = "/login"; 
     }, 6000);
   }
 };
@@ -37,11 +37,11 @@ const TattooAppointment = () => {
   const [artists, setArtists] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [time, setTime] = useState(setHours(setMinutes(new Date(), 0), 9));
-  const [imagePreview, setImagePreview] = useState(null); // To store image preview
+  const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    checkLogin(); // Check if the user is logged in when the component mounts
+    checkLogin();
     const fetchArtists = async () => {
       try {
         const token = localStorage.getItem("auth_token");
@@ -64,15 +64,15 @@ const TattooAppointment = () => {
   };
 
   const handleTimeChange = (e) => {
-    const [hours] = e.target.value.split(":").map(Number); // Only use hours
-    const newTime = setHours(setMinutes(new Date(), 0), hours); // Set minutes to 0
+    const [hours] = e.target.value.split(":").map(Number); 
+    const newTime = setHours(setMinutes(new Date(), 0), hours);
     setTime(newTime);
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const maxFileSize = 5 * 1024 * 1024; // 5MB
+      const maxFileSize = 5 * 1024 * 1024; 
       const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
 
       if (file.size > maxFileSize) {
@@ -87,7 +87,7 @@ const TattooAppointment = () => {
 
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result); // Set the image preview
+        setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -104,7 +104,7 @@ const TattooAppointment = () => {
       return;
     }
 
-    // Ensure the appointment is within allowed hours (9 AM to 7 PM)
+    
     const appointmentHour = time.getHours();
     if (appointmentHour < 9 || appointmentHour > 19) {
       toast.error("Appointments can only be made between 9 AM and 7 PM.");
@@ -139,7 +139,7 @@ const TattooAppointment = () => {
       formData.append("description", description);
 
       if (file) {
-        formData.append("image", file); // Add the image file to the form data
+        formData.append("image", file); 
       }
 
       const token = localStorage.getItem("auth_token");
@@ -149,7 +149,7 @@ const TattooAppointment = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data", // Ensure the content type is set
+            "Content-Type": "multipart/form-data", 
           },
         }
       );
@@ -157,7 +157,7 @@ const TattooAppointment = () => {
       console.log("Appointment booked:", response);
       toast.success("Your appointment has been successfully booked!");
 
-      // Clear all fields after successful booking
+    
       setArtistId("");
       setDescription("");
       setSelectedDate(new Date());
@@ -165,7 +165,7 @@ const TattooAppointment = () => {
       setImagePreview(null);
       fileInputRef.current.value = "";
     } catch (error) {
-      console.error(error); // Log error details
+      console.error(error);
       toast.error(
         error.response?.data?.message ||
           "An error occurred. Please try again later."

@@ -9,7 +9,7 @@ const TicketConfirmation = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Capture the ticket ID from the URL
+    
     const queryParams = new URLSearchParams(location.search);
     const ticketId = queryParams.get("ticket_id");
 

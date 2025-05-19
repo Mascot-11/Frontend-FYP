@@ -103,8 +103,8 @@ const NavBar = ({ onLogin, onLogout }) => {
                 to={item.to}
                 className="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300"
                 onClick={() => {
-                  if (item.onClick) item.onClick(); // Call onClick if it exists
-                  setIsMenuOpen(false); // Close mobile menu after clicking
+                  if (item.onClick) item.onClick(); 
+                  setIsMenuOpen(false); 
                 }}
               >
                 <item.icon className="inline-block w-5 h-5 mr-2" />

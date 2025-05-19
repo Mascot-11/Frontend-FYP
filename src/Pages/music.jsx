@@ -23,7 +23,7 @@ const fetchEvents = async () => {
   return data;
 };
 
-// Khalti callback function
+
 const fetchKhaltiCallback = async (khaltiData) => {
   const { data } = await axios.post("/khalti/callback", khaltiData);
   return data;
@@ -36,18 +36,17 @@ const ColorModeEvents = () => {
   const upcomingRef = useRef(null);
   const [khaltiData, setKhaltiData] = useState(null);
 
-  // Fetch events using TanStack Query
+ 
   const { data: allEvents, isLoading, isError } = useQuery({
     queryKey: ["events"],
     queryFn: fetchEvents,
-    staleTime: 1* 60 * 1000, // Cache data for 1 minutes
+    staleTime: 1* 60 * 1000, 
   });
   
   const { data: khaltiResponse, isLoading: isKhaltiLoading, isError: isKhaltiError } = useQuery({
     queryKey: ["khaltiPayment", khaltiData],
     queryFn: () => fetchKhaltiCallback(khaltiData),
-    enabled: !!khaltiData, // Trigger only if khaltiData exists
-    onSuccess: (data) => {
+    enabled: !!khaltiData,     onSuccess: (data) => {
       setMessage(data.message);
       if (data.message.includes("successfully")) {
         toast.success("Payment Successful!");
@@ -81,11 +80,11 @@ const ColorModeEvents = () => {
         user_id: userId,
       };
   
-      // Set khaltiData state to trigger the query
+      
       setKhaltiData(khaltiData);
     }
   
-    // Clear the query parameters from the URL after processing
+ 
     if (location.search) {
       window.history.replaceState({}, document.title, location.pathname);
     }
@@ -133,8 +132,8 @@ const ColorModeEvents = () => {
         navItems={[
           { title: "Home", path: "/" },
           { title: "Events", path: "/events" },
-          { title: "About", path: "/about" },
-          { title: "Contact", path: "/contact" },
+          { title: "About", path: "/aboutus" },
+          { title: "FAQs", path: "/faq" },
         ]}
       />
 
