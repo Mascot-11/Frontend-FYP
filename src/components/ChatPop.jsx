@@ -168,7 +168,7 @@ export default function ChatPopup() {
 
       if (response.ok) {
         const data = await response.json()
-        // Add the message to the UI immediately (optimistic update)
+        
         const messageWithSender = {
           ...data.message,
           sender_id: userId,

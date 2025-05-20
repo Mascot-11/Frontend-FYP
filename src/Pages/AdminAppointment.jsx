@@ -131,6 +131,7 @@ const AdminAppointments = () => {
   const handleSearch = (e) => {
     setSearchQuery(e.target.value)
     setCurrentPage(1) 
+  }
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-white rounded-lg shadow-sm border">
@@ -294,7 +295,7 @@ const AdminAppointments = () => {
                       {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
                         let pageNumber
 
-                        // Calculate which page numbers to show
+                       
                         if (totalPages <= 5) {
                           pageNumber = i + 1
                         } else if (currentPage <= 3) {

@@ -263,7 +263,7 @@ const Dashboard = () => {
   }))
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen h-full bg-gray-50">
       {loading ? (
         <div className="flex justify-center items-center min-h-screen">
           <ClimbingBoxLoader color="#000000" size={30} />

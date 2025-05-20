@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react"
 import { getUsers, deleteUser, addUser, updateUser } from "../Utils/api"
 import { Pencil, Trash2, Plus, Eye, EyeOff, Search, ChevronLeft, ChevronRight } from "lucide-react"
 
-
+// Custom Button Component
 const Button = ({
   children,
   className = "",
@@ -37,7 +37,7 @@ const Button = ({
   )
 }
 
-
+// Email component with smooth transition
 const BlurredEmail = ({ email, isVisible, toggleVisibility }) => {
   const [username, domain] = email.split("@")
   const [domainName, extension] = domain.split(".")
@@ -45,7 +45,7 @@ const BlurredEmail = ({ email, isVisible, toggleVisibility }) => {
   return (
     <div className="flex items-center gap-2 group">
       <div className="relative font-mono cursor-pointer" onClick={toggleVisibility}>
-        
+        {/* Visible email (shown when isVisible is true) */}
         <span
           className={`transition-all duration-300 ${
             isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95 absolute pointer-events-none"
@@ -54,7 +54,7 @@ const BlurredEmail = ({ email, isVisible, toggleVisibility }) => {
           {email}
         </span>
 
-       
+        {/* Blurred email (shown when isVisible is false) */}
         <span
           className={`transition-all duration-300 ${
             isVisible ? "opacity-0 scale-95 absolute pointer-events-none" : "opacity-100 scale-100"
@@ -242,7 +242,8 @@ const UserList = () => {
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value)
-    setCurrentPage(1) 
+    setCurrentPage(1) // Reset to first page when searching
+  }
 
   const clearError = () => {
     setError(null)

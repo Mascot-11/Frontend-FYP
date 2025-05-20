@@ -1,9 +1,19 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Twitter } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 export default function Footer() {
+  const location = useLocation();
+
+  if (
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/dashboard")
+  ) {
+    return null;
+  }
+
   return (
-    <footer className="bg-zinc-900 text-white">
+    <footer className="bg-zinc-900 text-white relative">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Color Mode Section */}

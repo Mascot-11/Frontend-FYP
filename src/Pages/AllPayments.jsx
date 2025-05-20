@@ -22,7 +22,7 @@ const AllPayments = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPayment, setSelectedPayment] = useState(null)
   axios.defaults.baseURL = import.meta.env.VITE_API_URL;
-  // Pagination state
+
   const [currentPage, setCurrentPage] = useState(1)
   const [paymentsPerPage] = useState(6)
 
@@ -31,17 +31,17 @@ const AllPayments = () => {
       try {
         const token = localStorage.getItem("auth_token")
 
-        // Fetch all payments
+      
         const paymentsResponse = await axios.get("/payments/all", {
           headers: { Authorization: `Bearer ${token}` },
         })
 
-        // Add a small delay to make the loading animation visible
+        
         setTimeout(() => {
           setPayments(paymentsResponse.data.payments)
         }, 500)
 
-        // Fetch all events
+        
         const eventsResponse = await axios.get("/events")
         const eventMap = {}
         eventsResponse.data.forEach((event) => {
@@ -67,24 +67,24 @@ const AllPayments = () => {
     fetchPaymentsAndEvents()
   }, [])
 
-
+ 
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" }
     return new Date(dateString).toLocaleDateString(undefined, options)
   }
 
-
+  
   const formatTime = (timeString) => {
     if (!timeString) return "N/A"
 
     try {
-
+      
       let time
       if (timeString.includes("T")) {
- 
+       
         time = new Date(timeString)
       } else if (timeString.includes(":")) {
-  
+        
         const [hours, minutes] = timeString.split(":")
         time = new Date()
         time.setHours(hours, minutes)
@@ -99,7 +99,7 @@ const AllPayments = () => {
     }
   }
 
-
+ 
   const getSortedPayments = () => {
     if (!payments.length) return []
 
@@ -128,21 +128,21 @@ const AllPayments = () => {
     })
   }
 
-
+  
   const sortedPayments = getSortedPayments()
   const indexOfLastPayment = currentPage * paymentsPerPage
   const indexOfFirstPayment = indexOfLastPayment - paymentsPerPage
   const currentPayments = sortedPayments.slice(indexOfFirstPayment, indexOfLastPayment)
   const totalPages = Math.ceil(sortedPayments.length / paymentsPerPage)
 
-  // Change page
+  
   const paginate = (pageNumber) => {
     if (pageNumber > 0 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber)
     }
   }
 
-
+  
   const handleViewDetails = (payment) => {
     setSelectedPayment(payment)
   }
@@ -151,7 +151,7 @@ const AllPayments = () => {
     setSelectedPayment(null)
   }
 
-
+  // Skeleton loading component
   const SkeletonCard = () => (
     <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
       <div className="p-4 space-y-3">
